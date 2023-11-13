@@ -1,6 +1,5 @@
 # Fusion360API Python Addin
 
-# from gettext import install
 import pathlib
 import traceback
 import adsk.core as core
@@ -43,7 +42,6 @@ ICON_MAP = {
     core.ProgrammingLanguages.CPPProgramminglanguage: "resources/cpp.png",
 }
 
-
 @dataclass
 class ScriptContainer:
     id: int
@@ -81,6 +79,7 @@ class ScriptContainer:
 
 class ScriptsManager():
     def __init__(self) -> None:
+        self.installationFolders = self._get_installation_folders()
         self.items: list = self._get_scripts()
 
 
@@ -100,7 +99,7 @@ class ScriptsManager():
                 ScriptContainer(
                     idx,
                     script,
-                    self._get_installation_folders()
+                    self.installationFolders,
                 )
             )
 
