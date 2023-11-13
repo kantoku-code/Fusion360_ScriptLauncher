@@ -1,9 +1,12 @@
 # Fusion360API Python Addin
 
+# from gettext import install
+import pathlib
 import traceback
 import adsk.core as core
 import re
 from dataclasses import dataclass
+import pathlib
 
 TREE_PATTERNS = [
     ["Number", "^[\d+]"],
@@ -45,20 +48,27 @@ ICON_MAP = {
 class ScriptContainer:
     id: int
     script: core.Script
+    installFolders: list[str]
 
     def __post_init__(self):
-        pass
+        isInstallMark = "☆" if self._is_installation_script() else ""
+        self.name = f"{isInstallMark}{self.script.name}"        
+        self.icon = ICON_MAP[self.script.programmingLanguage]
+        self.tooltip = self.script.description
+
 
     def toJson(self):
-        icon = ICON_MAP[self.script.programmingLanguage]
-        tooltip = self.script.description
-        
         return {
             "id": self.id,
-            "text": self.script.name,
-            "icon": icon,
-            "a_attr": {"title": tooltip},
+            "text": self.name,
+            "icon": self.icon,
+            "a_attr": {"title": self.tooltip},
         }
+
+
+    def _is_installation_script(self) -> bool:
+        return get_parent_folder(self.script) in self.installFolders
+
 
     def exec(self):
         try:
@@ -73,6 +83,7 @@ class ScriptsManager():
     def __init__(self) -> None:
         self.items: list = self._get_scripts()
 
+
     def _get_scripts(self):
         app: core.Application = core.Application.get()
         scripts = [s for s in app.scripts if not s.isAddIn]
@@ -86,10 +97,21 @@ class ScriptsManager():
                 continue
 
             lst.append(
-                ScriptContainer(idx, script)
+                ScriptContainer(
+                    idx,
+                    script,
+                    self._get_installation_folders()
+                )
             )
 
         return lst
+
+
+    def _get_installation_folders(self) -> list[str]:
+        app: core.Application = core.Application.get()
+
+        return [get_parent_folder(s) for s in app.scripts
+                if s.name == "SpurGear"]
 
 
     def _group_by(self, scripts: list) -> dict:
@@ -143,3 +165,7 @@ class ScriptsManager():
                 return item.script
 
         return core.Script.cast(None)
+
+
+def get_parent_folder(script: core.Script) -> str:
+    return str(pathlib.Path(script.folder).parent)
