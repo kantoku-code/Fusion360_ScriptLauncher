@@ -13,7 +13,7 @@ _cmdInfo = {
     "id": "kantoku_ScriptLauncher",
     "name": "Script Launcher",
     "tooltip": "This is an experimental and simplified script menu.",
-    "resources": ""
+    "resources": "resources"
 }
 
 _paletteInfo = {
