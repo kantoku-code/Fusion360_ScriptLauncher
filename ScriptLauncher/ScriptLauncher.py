@@ -23,6 +23,7 @@ _paletteInfo = {
     "isVisible": True,
     "showCloseButton": True,
     "isResizable": True,
+    "isOpaque": False,
     "width": 400,
     "height": 300,
     "useNewWebBrowser": True,
@@ -68,16 +69,18 @@ def initPallet():
     if palette:
         palette.deleteMe()
 
-    palette = _ui.palettes.add(
+    # palette = _ui.palettes.add(
+    palette = _ui.palettes.addTransparent(
         _paletteInfo["id"],
         _paletteInfo["name"],
         _paletteInfo["htmlFileURL"],
         _paletteInfo["isVisible"],
         _paletteInfo["showCloseButton"],
         _paletteInfo["isResizable"],
+        _paletteInfo["isOpaque"],
         _paletteInfo["width"],
         _paletteInfo["height"],
-        _paletteInfo["useNewWebBrowser"],
+        # _paletteInfo["useNewWebBrowser"],
     )
 
     if _paletteInfo["dockingState"]:
