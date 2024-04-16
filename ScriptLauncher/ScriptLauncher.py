@@ -1,6 +1,5 @@
 # Fusion360API Python Addin
 import adsk.core as core
-# import adsk.fusion as fusion
 import traceback
 import json
 from .ScriptsManager import ScriptsManager
@@ -13,7 +12,8 @@ _cmdInfo = {
     "id": "kantoku_ScriptLauncher",
     "name": "Script Launcher",
     "tooltip": "This is an experimental and simplified script menu.",
-    "resources": "resources"
+    "resources": "resources",
+    "panelIds": ("SolidScriptsAddinsPanel", "CAMScriptsAddinsPanel")
 }
 
 _paletteInfo = {
@@ -65,11 +65,10 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
 def initPallet():
     global _ui, _paletteInfo
 
-    palette = _ui.palettes.itemById(_paletteInfo["id"])
+    palette: core.palette = _ui.palettes.itemById(_paletteInfo["id"])
     if palette:
         palette.deleteMe()
 
-    # palette = _ui.palettes.add(
     palette = _ui.palettes.addTransparent(
         _paletteInfo["id"],
         _paletteInfo["name"],
@@ -80,7 +79,6 @@ def initPallet():
         _paletteInfo["isOpaque"],
         _paletteInfo["width"],
         _paletteInfo["height"],
-        # _paletteInfo["useNewWebBrowser"],
     )
 
     if _paletteInfo["dockingState"]:
@@ -157,10 +155,11 @@ def run(context):
         showPaletteCmdDef.commandCreated.add(onCommandCreated)
         handlers.append(onCommandCreated)
 
-        panel = _ui.allToolbarPanels.itemById("SolidScriptsAddinsPanel")
-        cntrl = panel.controls.itemById("showPalette")
-        if not cntrl:
-            panel.controls.addCommand(showPaletteCmdDef)
+        for panelId in _cmdInfo["panelIds"]:
+            panel = _ui.allToolbarPanels.itemById(panelId)
+            cntrl = panel.controls.itemById("showPalette")
+            if not cntrl:
+                panel.controls.addCommand(showPaletteCmdDef)
     except:
         if _ui:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
@@ -174,10 +173,12 @@ def stop(context):
             palette.deleteMe()
 
         global _cmdInfo
-        panel = _ui.allToolbarPanels.itemById("SolidScriptsAddinsPanel")
-        cmd = panel.controls.itemById(_cmdInfo["id"])
-        if cmd:
-            cmd.deleteMe()
+        for panelId in _cmdInfo["panelIds"]:
+            panel = _ui.allToolbarPanels.itemById(panelId)
+            cmd = panel.controls.itemById(_cmdInfo["id"])
+            if cmd:
+                cmd.deleteMe()
+
         cmdDef = _ui.commandDefinitions.itemById(_cmdInfo["id"])
         if cmdDef:
             cmdDef.deleteMe()

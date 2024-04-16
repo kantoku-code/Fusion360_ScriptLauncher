@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.6
++ CAMにもコマンド追加
+
 ## 0.0.5
 + アイコンの追加
 
