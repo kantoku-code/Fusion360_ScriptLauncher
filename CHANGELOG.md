@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.7
++ ScriptsManager のリファクタリング
+
 ## 0.0.6
 + CAMにもコマンド追加
 
