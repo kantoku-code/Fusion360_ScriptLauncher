@@ -32,12 +32,19 @@ _paletteInfo = {
 
 
 class MyHTMLEventHandler(core.HTMLEventHandler):
+    """パレットの HTML イベントを処理するハンドラ。
+
+    htmlLoaded 時にスクリプト一覧を jsTree 形式で返し、
+    execScript 時に指定スクリプトを実行する。
+    """
+
     def __init__(self):
         super().__init__()
         self.treeJson = None
         self.scriptsMgr = None
 
     def notify(self, args):
+        """HTML イベントを受け取り、アクションに応じて処理する。"""
         try:
             htmlArgs = core.HTMLEventArgs.cast(args)
 
@@ -63,6 +70,7 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
 
 
 def initPallet():
+    """パレットを初期化して表示する。既存パレットがある場合は削除してから再生成する。"""
     global _ui, _paletteInfo
 
     palette: core.palette = _ui.palettes.itemById(_paletteInfo["id"])
@@ -96,10 +104,13 @@ def initPallet():
 
 
 class ShowPaletteCommandExecuteHandler(core.CommandEventHandler):
+    """パレット表示コマンドの実行ハンドラ。"""
+
     def __init__(self):
         super().__init__()
 
     def notify(self, args):
+        """コマンド実行時にパレットを初期化・表示する。"""
         try:
             initPallet()
         except:
@@ -108,10 +119,13 @@ class ShowPaletteCommandExecuteHandler(core.CommandEventHandler):
 
 
 class MyCloseEventHandler(core.UserInterfaceGeneralEventHandler):
+    """パレットのクローズイベントハンドラ。"""
+
     def __init__(self):
         super().__init__()
 
     def notify(self, args):
+        """パレットが閉じられたときの処理。"""
         try:
             pass
         except:
@@ -119,10 +133,13 @@ class MyCloseEventHandler(core.UserInterfaceGeneralEventHandler):
 
 
 class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
+    """パレット表示コマンドの生成ハンドラ。実行ハンドラを登録する。"""
+
     def __init__(self):
         super().__init__()
 
     def notify(self, args):
+        """コマンド生成時に実行ハンドラをコマンドへ登録する。"""
         try:
             command = args.command
             onExecute = ShowPaletteCommandExecuteHandler()
@@ -133,6 +150,7 @@ class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
 
 
 def run(context):
+    """アドイン起動時の処理。コマンドボタンをツールバーパネルに追加する。"""
     try:
         global _ui, _app
         _app = core.Application.get()
@@ -166,6 +184,7 @@ def run(context):
 
 
 def stop(context):
+    """アドイン停止時の処理。パレットとコマンドボタンを削除する。"""
     try:
         global _paletteInfo
         palette = _ui.palettes.itemById(_paletteInfo["id"])
