@@ -60,8 +60,13 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                 )
 
             elif htmlArgs.action == "execScript":
+                if not self.scriptsMgr:
+                    return
                 data = json.loads(htmlArgs.data)
-                script: core.Script = self.scriptsMgr.get_item_by_id(int(data["id"]))
+                idStr = str(data.get("id", ""))
+                if not idStr.isdigit():
+                    return
+                script: core.Script = self.scriptsMgr.get_item_by_id(int(idStr))
                 if script:
                     script.run()
 
