@@ -41,6 +41,7 @@
 
             adsk.fusionSendData("htmlLoaded", "").then((ret) => {
               let obj = JSON.parse(ret || "null");
+              if (!obj || !obj.data) return;
               $("#tree").jstree(true).settings.core.data = obj.data;
               $("#tree").jstree(true).refresh();
             });
