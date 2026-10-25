@@ -175,6 +175,8 @@ def run(context):
 
         for panelId in _cmdInfo["panelIds"]:
             panel = _ui.allToolbarPanels.itemById(panelId)
+            if not panel:
+                continue
             cntrl = panel.controls.itemById("showPalette")
             if not cntrl:
                 panel.controls.addCommand(showPaletteCmdDef)
@@ -194,6 +196,8 @@ def stop(context):
         global _cmdInfo
         for panelId in _cmdInfo["panelIds"]:
             panel = _ui.allToolbarPanels.itemById(panelId)
+            if not panel:
+                continue
             cmd = panel.controls.itemById(_cmdInfo["id"])
             if cmd:
                 cmd.deleteMe()
