@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.8
++ グループノードとスクリプトの ID 衝突を修正（グループのダブルクリックで別スクリプトが実行される不具合）
+
 ## 0.0.7
 + ScriptsManager のリファクタリング
 

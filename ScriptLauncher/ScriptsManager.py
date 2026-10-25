@@ -146,7 +146,6 @@ class ScriptsManager():
         """jsTree 用のツリーデータ（グループ＋子ノード）をリストで返す。"""
         groups = self._group_by(self.items)
         treeContent = []
-        groupCount = len(self.items)
         for key in groups:
             if len(groups[key]) < 1:
                 continue
@@ -154,12 +153,11 @@ class ScriptsManager():
             children = [item.toJson() for item in groups[key]]
             treeContent.append(
                 {
-                    "id": groupCount,
+                    "id": f"group_{key}",
                     "text": key,
                     "children": children,
                 }
             )
-            groupCount += 1
 
         return treeContent
 
