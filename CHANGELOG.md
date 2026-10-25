@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.11
++ jQuery を同梱し、オフライン環境でも表示できるように修正
+
 ## 0.0.10
 + ボタン重複チェックのコマンドIDの誤りを修正
 
