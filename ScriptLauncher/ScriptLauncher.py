@@ -177,7 +177,7 @@ def run(context):
             panel = _ui.allToolbarPanels.itemById(panelId)
             if not panel:
                 continue
-            cntrl = panel.controls.itemById("showPalette")
+            cntrl = panel.controls.itemById(_cmdInfo["id"])
             if not cntrl:
                 panel.controls.addCommand(showPaletteCmdDef)
     except:
