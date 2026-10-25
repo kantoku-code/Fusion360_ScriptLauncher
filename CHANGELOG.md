@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.14
++ 正規表現の SyntaxWarning を修正
+
 ## 0.0.13
 + パレット側のデータ受信時の null チェックを追加
 

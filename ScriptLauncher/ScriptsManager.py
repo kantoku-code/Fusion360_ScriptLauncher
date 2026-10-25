@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import pathlib
 
 TREE_PATTERNS = [
-    ["Number", "^[\d+]"],
+    ["Number", r"^\d"],
     ["A", "^[a]"],
     ["B", "^[b]"],
     ["C", "^[c]"],
