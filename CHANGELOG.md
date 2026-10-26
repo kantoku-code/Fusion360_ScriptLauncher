@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.15
++ マウスホバー時にパレットの背景を不透明にするように変更
+
 ## 0.0.14
 + 正規表現の SyntaxWarning を修正
 
