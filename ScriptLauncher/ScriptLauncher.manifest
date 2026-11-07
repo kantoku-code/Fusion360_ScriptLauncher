@@ -4,9 +4,10 @@
 	"id":	"1506da2c-87de-4760-aea9-76bda62d547e",
 	"author": "kantoku",
 	"description":	{
-		"":	""
+		"ja":	"スクリプトをツリー状のメニューから簡単に実行できるようにするアドインです。",
+		"":	"A tree-like menu to simplify the sequential execution of scripts."
 	},
-	"version":	"0.0.15",
+	"version":	"0.0.16",
 	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
 	"editEnabled":	true

@@ -7,6 +7,10 @@ from .ScriptsManager import ScriptsManager
 handlers = []
 _app: core.Application = None
 _ui: core.UserInterface = None
+_palette_visible = False
+_is_stopping = False
+_workspace_handlers = []
+_palette_geometry = None
 
 _cmdInfo = {
     "id": "kantoku_ScriptLauncher",
@@ -74,12 +78,17 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
 
-def initPallet():
-    """パレットを初期化して表示する。既存パレットがある場合は削除してから再生成する。"""
+def initPallet(keepIfVisible=False):
+    """パレットを初期化して表示する。既存パレットがある場合は削除してから再生成する。
+
+    keepIfVisible が True で、既存パレットが有効かつ表示中の場合は何もしない。
+    """
     global _ui, _paletteInfo
 
     palette: core.palette = _ui.palettes.itemById(_paletteInfo["id"])
-    if palette:
+    if keepIfVisible and palette and palette.isValid and palette.isVisible:
+        return
+    if palette and palette.isValid:
         palette.deleteMe()
 
     palette = _ui.palettes.addTransparent(
@@ -94,7 +103,19 @@ def initPallet():
         _paletteInfo["height"],
     )
 
-    if _paletteInfo["dockingState"]:
+    if _palette_geometry:
+        try:
+            geo = _palette_geometry
+            if geo["dockingState"] != core.PaletteDockingStates.PaletteDockStateFloating:
+                palette.dockingState = geo["dockingState"]
+            else:
+                palette.setPosition(geo["left"], geo["top"])
+                palette.setSize(geo["width"], geo["height"])
+        except:
+            _app.log("Failed to restore palette geometry:\n{}".format(
+                traceback.format_exc()))
+            palette.setPosition(800, 400)
+    elif _paletteInfo["dockingState"]:
         palette.dockingState = _paletteInfo["dockingState"]
     else:
         palette.setPosition(800, 400)
@@ -117,6 +138,8 @@ class ShowPaletteCommandExecuteHandler(core.CommandEventHandler):
     def notify(self, args):
         """コマンド実行時にパレットを初期化・表示する。"""
         try:
+            global _palette_visible
+            _palette_visible = True
             initPallet()
         except:
             _ui.messageBox("Command executed failed: {}".format(
@@ -132,9 +155,50 @@ class MyCloseEventHandler(core.UserInterfaceGeneralEventHandler):
     def notify(self, args):
         """パレットが閉じられたときの処理。"""
         try:
-            pass
+            global _palette_visible
+            if _is_stopping:
+                return
+            _palette_visible = False
         except:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
+
+
+class MyWorkspacePreDeactivateHandler(core.WorkspaceEventHandler):
+    """ワークスペース切替直前にパレットの位置・サイズを記録するハンドラ。"""
+
+    def __init__(self):
+        super().__init__()
+
+    def notify(self, args):
+        try:
+            global _palette_geometry
+            palette = _ui.palettes.itemById(_paletteInfo["id"])
+            if palette and palette.isValid and palette.isVisible:
+                _palette_geometry = {
+                    "left": palette.left,
+                    "top": palette.top,
+                    "width": palette.width,
+                    "height": palette.height,
+                    "dockingState": palette.dockingState,
+                }
+        except:
+            core.Application.get().log(
+                "Failed:\n{}".format(traceback.format_exc()))
+
+
+class MyWorkspaceActivatedHandler(core.WorkspaceEventHandler):
+    """ワークスペース切替後、Fusion に破棄されたパレットを再作成するハンドラ。"""
+
+    def __init__(self):
+        super().__init__()
+
+    def notify(self, args):
+        try:
+            if _palette_visible and not _is_stopping:
+                initPallet(keepIfVisible=True)
+        except:
+            core.Application.get().log(
+                "Failed:\n{}".format(traceback.format_exc()))
 
 
 class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
@@ -157,7 +221,9 @@ class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
 def run(context):
     """アドイン起動時の処理。コマンドボタンをツールバーパネルに追加する。"""
     try:
-        global _ui, _app
+        global _ui, _app, _is_stopping, _palette_visible
+        _is_stopping = False
+        _palette_visible = False
         _app = core.Application.get()
         _ui = _app.userInterface
 
@@ -185,6 +251,15 @@ def run(context):
             cntrl = panel.controls.itemById(_cmdInfo["id"])
             if not cntrl:
                 panel.controls.addCommand(showPaletteCmdDef)
+
+        # ワークスペース切替で破棄されたパレットを再作成する
+        onPreDeactivate = MyWorkspacePreDeactivateHandler()
+        _ui.workspacePreDeactivate.add(onPreDeactivate)
+        _workspace_handlers.append((_ui.workspacePreDeactivate, onPreDeactivate))
+
+        onActivated = MyWorkspaceActivatedHandler()
+        _ui.workspaceActivated.add(onActivated)
+        _workspace_handlers.append((_ui.workspaceActivated, onActivated))
     except:
         if _ui:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
@@ -192,6 +267,15 @@ def run(context):
 
 def stop(context):
     """アドイン停止時の処理。パレットとコマンドボタンを削除する。"""
+    global _is_stopping
+    _is_stopping = True
+    for event, handler in _workspace_handlers:
+        try:
+            event.remove(handler)
+        except:
+            pass
+    _workspace_handlers.clear()
+
     try:
         global _paletteInfo
         palette = _ui.palettes.itemById(_paletteInfo["id"])
