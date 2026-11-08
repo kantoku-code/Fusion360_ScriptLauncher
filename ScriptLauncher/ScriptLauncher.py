@@ -23,6 +23,19 @@ _cmdInfo = {
     "panelIds": ("SolidScriptsAddinsPanel", "CAMScriptsAddinsPanel")
 }
 
+# アドインパネルを持たないワークスペースへの追加設定
+_extraWorkspaceIds = (
+    "FusionRenderEnvironment",          # レンダリング
+    "FusionDocumentationEnvironment",   # 図面
+)
+_TAB_ID = "kantoku_ToolsTab"
+_PANEL_ID = "kantoku_SolidScriptsAddinsPanel"
+_addinsPanelCmdIds = (
+    "ScriptsManagerCommand",    # スクリプトとアドイン
+    "ExchangeAppStoreCommand",  # Fusion App Store
+)
+_extraPanels = []
+
 _paletteInfo = {
     "id": "ScriptPalette",
     "name": _cmdInfo["name"],
@@ -239,6 +252,92 @@ class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
 
+def find_utilities_tab(ws: core.Workspace, name: str) -> core.ToolbarTab:
+    """ワークスペースの標準ユーティリティタブを名前で探す。自前(kantoku_)は除く。"""
+    for tab in ws.toolbarTabs:
+        if tab.id.startswith("kantoku_"):
+            continue
+        if tab.name == name:
+            return tab
+    return None
+
+
+def add_to_extra_workspaces(cmdDef: core.CommandDefinition):
+    """レンダリング・図面のユーティリティタブにアドインパネルを用意し、
+    標準のアドインパネルのコマンドと本コマンドを追加する。
+
+    ユーティリティタブが無ければ生成し、タブ内にアドインパネルが無ければ生成する。
+    """
+    refTab = _ui.toolbarTabsByProductType(
+        "DesignProductType").itemById("ToolsTab")
+    refPanel = refTab.toolbarPanels.itemById(
+        "SolidScriptsAddinsPanel") if refTab else None
+    tabName = refTab.name if refTab else "Utilities"
+    panelName = refPanel.name if refPanel else "Add-Ins"
+
+    # 追加するコマンド（標準アドインパネルのコマンド + 本コマンド）
+    cmdDefs = []
+    for cmdId in _addinsPanelCmdIds:
+        d = _ui.commandDefinitions.itemById(cmdId)
+        if d:
+            cmdDefs.append(d)
+    cmdDefs.append(cmdDef)
+
+    for wsId in _extraWorkspaceIds:
+        ws: core.Workspace = _ui.workspaces.itemById(wsId)
+        if not ws:
+            continue
+
+        # ユーティリティタブ（標準 → 自前 → 生成）
+        tab: core.ToolbarTab = find_utilities_tab(ws, tabName)
+        if not tab:
+            tab = ws.toolbarTabs.itemById(_TAB_ID)
+        if not tab:
+            tab = ws.toolbarTabs.add(_TAB_ID, tabName)
+
+        # アドインパネル（既存 → 生成）
+        panel: core.ToolbarPanel = None
+        for p in tab.toolbarPanels:
+            if p.id == _PANEL_ID or p.name == panelName:
+                panel = p
+                break
+        if not panel:
+            panel = tab.toolbarPanels.add(_PANEL_ID, panelName)
+
+        _app.log("ScriptLauncher: {} -> {} / {}".format(
+            wsId, tab.id, panel.id))
+
+        added = []
+        for d in cmdDefs:
+            if panel.controls.itemById(d.id):
+                continue
+            panel.controls.addCommand(d)
+            added.append(d.id)
+        _extraPanels.append((panel, tab, added))
+
+
+def remove_from_extra_workspaces():
+    """追加したコマンドを削除し、空になった自前のパネル・タブを削除する。"""
+    for panel, tab, added in _extraPanels:
+        try:
+            if not panel.isValid:
+                continue
+            for cmdId in added:
+                cntrl = panel.controls.itemById(cmdId)
+                if cntrl:
+                    cntrl.deleteMe()
+
+            # 他アドインのボタンが残っている場合や標準のものは削除しない
+            if panel.id == _PANEL_ID and panel.controls.count == 0:
+                panel.deleteMe()
+            if tab.isValid and tab.id == _TAB_ID \
+                    and tab.toolbarPanels.count == 0:
+                tab.deleteMe()
+        except:
+            _app.log("Failed:\n{}".format(traceback.format_exc()))
+    _extraPanels.clear()
+
+
 def run(context):
     """アドイン起動時の処理。コマンドボタンをツールバーパネルに追加する。"""
     try:
@@ -272,6 +371,9 @@ def run(context):
             cntrl = panel.controls.itemById(_cmdInfo["id"])
             if not cntrl:
                 panel.controls.addCommand(showPaletteCmdDef)
+
+        # レンダリング・図面のアドインパネルに追加する
+        add_to_extra_workspaces(showPaletteCmdDef)
 
         # ワークスペース切替で破棄されたパレットを再作成する
         onPreDeactivate = MyWorkspacePreDeactivateHandler()
@@ -312,7 +414,9 @@ def stop(context):
             if cmd:
                 cmd.deleteMe()
 
-        cmdDef = _ui.commandDefinitions.itemById(_cmdInfo["id"])
+        remove_from_extra_workspaces()
+
+        cmdDef =_ui.commandDefinitions.itemById(_cmdInfo["id"])
         if cmdDef:
             cmdDef.deleteMe()
 
