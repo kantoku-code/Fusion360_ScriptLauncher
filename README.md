@@ -7,9 +7,13 @@ A tree-like menu to simplify the sequential execution of scripts.
 
 ## **Installation**:
 
-To install, download/extract the zip file and register the "ScriptLauncher" folder as an **add-in**.
+1. Quit Autodesk Fusion.
+2. Download and extract the zip file.
+3. Run `installer\install_Win.cmd` in the extracted folder.
+4. Follow the on-screen instructions and enter `Y`.
+5. The "ScriptLauncher" folder is copied to `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\ScriptLauncher`.
 
-To register add-ins, follow the instructions [here](https://knowledge.autodesk.com/support/fusion-360/troubleshooting/caas/sfdcarticles/sfdcarticles/How-to-install-an-ADD-IN-and-Script-in-Fusion-360.html).
+To uninstall, delete the copied "ScriptLauncher" folder.
 
 ---
 ## **usage method**:
@@ -30,12 +34,15 @@ To register add-ins, follow the instructions [here](https://knowledge.autodesk.c
 
 - Double-clicking on any script executes the corresponding script.
 
+- Right-clicking on a script and selecting "フォルダオープン" (Open Folder) opens the folder of that script.
+
 ---
 
 ## **Features**:
 
 - **Supported workspaces**
   - The command is added to the "Utilities" - "Add-Ins" panel in both the "Design" and "Manufacture (CAM)" workspaces.
+  - In the "Render" and "Drawing" workspaces, an "Add-Ins" panel is added to the "Utilities" tab (the tab is created if it does not exist), and this command, "Scripts and Add-Ins" and "Fusion App Store" are added to it.
 
 - **Tree grouping rules**
   - Scripts are grouped by the first character of their name (case-insensitive).
@@ -61,7 +68,7 @@ To register add-ins, follow the instructions [here](https://knowledge.autodesk.c
 ---
 
 ## **Libraries**:
-- [jsTree](https://www.jstree.com/) (MIT License) - icon image only (`resources/tree.png`)
+- [jsTree](https://www.jstree.com/) (MIT License) - icon image (`ScriptLauncher/html/resources/tree.png`) and styles based on the default theme (`ScriptLauncher/html/style.css`)
 
 ---
 
@@ -69,8 +76,8 @@ To register add-ins, follow the instructions [here](https://knowledge.autodesk.c
 
 The following environment is confirmed.
 
-- Fusion360 Ver2.0.18719
-- Windows10 64bit Home
+- Autodesk Fusion Ver2706.1.17
+- Windows11 64bit Home
 
 ---
 
@@ -89,9 +96,13 @@ The following environment is confirmed.
 ---
 
 ## **インストール**:
-インストールする際は、zip ファイルをダウンロード/展開後 "ScriptLauncher" フォルダを **アドイン** として登録してください。
+1. Fusion を終了します。
+2. zip ファイルをダウンロードし、展開します。
+3. 展開したフォルダ内の `installer\install_Win.cmd` を実行します。
+4. 画面の指示に従い、`Y` を入力します。
+5. "ScriptLauncher" フォルダが `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\ScriptLauncher` にコピーされます。
 
-アドインの登録は、[こちら](https://kantoku.hatenablog.com/entry/2021/02/15/161734)の手順に従ってください。
+アンインストールはコピーされた "ScriptLauncher" フォルダを削除してください。
 
 ---
 ## **使用法**:
@@ -112,12 +123,15 @@ The following environment is confirmed.
 
 - 任意のスクリプトをダブルクリックする事で、該当するスクリプトが実行されます。
 
+- スクリプトを右クリックして "フォルダオープン" を選ぶと、該当するスクリプトのフォルダが開きます。
+
 ---
 
 ## **機能**:
 
 - **対応ワークスペース**
   - "デザイン" と "製造(CAM)" の両方の "ユーティリティ" - "アドイン" パネルにコマンドが追加されます。
+  - "レンダリング" と "図面" では、"ユーティリティ" タブ（無い場合は作成）に "アドイン" パネルを追加し、本コマンドと "スクリプトとアドイン"・"Fusion App Store" を登録します。
 
 - **ツリーの分類ルール**
   - スクリプト名の先頭文字でグループ分けします（大文字・小文字は区別しません）。
@@ -143,14 +157,14 @@ The following environment is confirmed.
 ---
 
 ## **使用ライブラリ**:
-- [jsTree](https://www.jstree.com/) (MIT License) - アイコン画像のみ使用（`resources/tree.png`）
+- [jsTree](https://www.jstree.com/) (MIT License) - アイコン画像（`ScriptLauncher/html/resources/tree.png`）と default テーマを元にしたスタイル（`ScriptLauncher/html/style.css`）
 
 ---
 
 ## **動作環境**:
-- Autodesk Fusion Ver2706.1.14
+- Autodesk Fusion Ver2706.1.17
 
-- Windows10 64bit Home
+- Windows11 64bit Home
 
 ---
 

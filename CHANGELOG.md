@@ -1,5 +1,9 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.0.19
++ Windows 用インストーラー（installer/install_Win.cmd）を追加
++ README のインストール手順をインストーラー用に変更し、実装と一致しない記述を修正
+
 ## 0.0.18
 + スクリプトの右クリックメニューに「フォルダを開く」を追加
 + スクリプトにホバーで説明を表示するように変更
