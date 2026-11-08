@@ -61,8 +61,7 @@ To register add-ins, follow the instructions [here](https://knowledge.autodesk.c
 ---
 
 ## **Libraries**:
-- [jsTree](https://www.jstree.com/) (MIT License)
-- [jQuery](https://jquery.com/) (MIT License)
+- [jsTree](https://www.jstree.com/) (MIT License) - icon image only (`resources/tree.png`)
 
 ---
 
@@ -144,8 +143,7 @@ The following environment is confirmed.
 ---
 
 ## **使用ライブラリ**:
-- [jsTree](https://www.jstree.com/) (MIT License)
-- [jQuery](https://jquery.com/) (MIT License)
+- [jsTree](https://www.jstree.com/) (MIT License) - アイコン画像のみ使用（`resources/tree.png`）
 
 ---
 

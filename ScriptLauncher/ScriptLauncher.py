@@ -23,7 +23,7 @@ _cmdInfo = {
 _paletteInfo = {
     "id": "ScriptPalette",
     "name": _cmdInfo["name"],
-    "htmlFileURL": "index.html",
+    "htmlFileURL": "html/index.html",
     "isVisible": True,
     "showCloseButton": True,
     "isResizable": True,
