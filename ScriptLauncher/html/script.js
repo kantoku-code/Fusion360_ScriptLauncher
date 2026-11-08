@@ -1,5 +1,8 @@
 const ANIMATION_MS = 200;
+const TOOLTIP_DELAY_MS = 500;
 const treeEl = document.getElementById("tree");
+const ctxMenuEl = document.getElementById("ctx-menu");
+const tooltipEl = document.getElementById("tooltip");
 
 // ---- render ----
 function createNode(item, isLast) {
@@ -20,7 +23,7 @@ function createNode(item, isLast) {
   a.className = "jstree-anchor";
   a.href = "#";
   a.tabIndex = -1;
-  if (item.a_attr && item.a_attr.title) a.title = item.a_attr.title;
+  if (item.a_attr && item.a_attr.title) a.dataset.description = item.a_attr.title;
 
   const icon = document.createElement("i");
   icon.className = "jstree-icon jstree-themeicon";
@@ -125,14 +128,119 @@ function execScript(li) {
   adsk.fusionSendData("execScript", JSON.stringify({ id: li.id }));
 }
 
+// ---- popup position ----
+function placePopup(el, x, y, offset) {
+  el.style.left = "0px";
+  el.style.top = "0px";
+  el.hidden = false;
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  let left = x + offset;
+  let top = y + offset;
+  if (left + w > vw) left = Math.max(0, x - offset - w);
+  if (top + h > vh) top = Math.max(0, y - offset - h);
+  el.style.left = left + "px";
+  el.style.top = top + "px";
+}
+
+// ---- tooltip ----
+let tooltipTimer = null;
+let lastMouse = { x: 0, y: 0 };
+
+function hideTooltip() {
+  clearTimeout(tooltipTimer);
+  tooltipTimer = null;
+  tooltipEl.hidden = true;
+}
+
+function scheduleTooltip(a) {
+  hideTooltip();
+  const text = a.dataset.description;
+  if (!text || isParent(a.parentElement) || !ctxMenuEl.hidden) return;
+  tooltipTimer = setTimeout(() => {
+    tooltipEl.textContent = text;
+    placePopup(tooltipEl, lastMouse.x, lastMouse.y, 14);
+  }, TOOLTIP_DELAY_MS);
+}
+
+// ---- context menu ----
+let ctxTargetId = null;
+
+function hideContextMenu() {
+  ctxMenuEl.hidden = true;
+  ctxTargetId = null;
+}
+
+function openFolder(id) {
+  if (!window.adsk) return;
+  adsk.fusionSendData("openFolder", JSON.stringify({ id: id }));
+}
+
 // ---- events ----
 treeEl.addEventListener("mouseover", (e) => {
   const a = e.target.closest(".jstree-anchor");
-  if (a && !a.contains(e.relatedTarget)) a.classList.add("jstree-hovered");
+  if (a && !a.contains(e.relatedTarget)) {
+    a.classList.add("jstree-hovered");
+    lastMouse = { x: e.clientX, y: e.clientY };
+    scheduleTooltip(a);
+  }
 });
 treeEl.addEventListener("mouseout", (e) => {
   const a = e.target.closest(".jstree-anchor");
-  if (a && !a.contains(e.relatedTarget)) a.classList.remove("jstree-hovered");
+  if (a && !a.contains(e.relatedTarget)) {
+    a.classList.remove("jstree-hovered");
+    hideTooltip();
+  }
+});
+treeEl.addEventListener("mousemove", (e) => {
+  lastMouse = { x: e.clientX, y: e.clientY };
+});
+
+treeEl.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  hideTooltip();
+  hideContextMenu();
+  const a = e.target.closest(".jstree-anchor");
+  if (!a) return;
+  const li = a.parentElement;
+  if (isParent(li) || !/^\d+$/.test(li.id)) return;
+  select(a);
+  focusAnchor(a);
+  ctxTargetId = li.id;
+  placePopup(ctxMenuEl, e.clientX, e.clientY, 2);
+});
+
+ctxMenuEl.addEventListener("contextmenu", (e) => e.preventDefault());
+ctxMenuEl.addEventListener("click", (e) => {
+  const item = e.target.closest(".ctx-item");
+  if (!item || ctxTargetId === null) return;
+  if (item.dataset.action === "openFolder") openFolder(ctxTargetId);
+  hideContextMenu();
+});
+
+document.addEventListener("mousedown", (e) => {
+  hideTooltip();
+  if (!ctxMenuEl.contains(e.target)) hideContextMenu();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    hideContextMenu();
+    hideTooltip();
+  }
+});
+treeEl.addEventListener("scroll", () => {
+  hideContextMenu();
+  hideTooltip();
+});
+window.addEventListener("scroll", () => {
+  hideContextMenu();
+  hideTooltip();
+});
+window.addEventListener("blur", () => {
+  hideContextMenu();
+  hideTooltip();
 });
 
 treeEl.addEventListener("click", (e) => {

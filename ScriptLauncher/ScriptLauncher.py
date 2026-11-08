@@ -2,6 +2,9 @@
 import adsk.core as core
 import traceback
 import json
+import os
+import sys
+import subprocess
 from .ScriptsManager import ScriptsManager
 
 handlers = []
@@ -73,6 +76,24 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                 script: core.Script = self.scriptsMgr.get_item_by_id(int(idStr))
                 if script:
                     script.run()
+
+            elif htmlArgs.action == "openFolder":
+                if not self.scriptsMgr:
+                    return
+                data = json.loads(htmlArgs.data)
+                idStr = str(data.get("id", ""))
+                if not idStr.isdigit():
+                    return
+                script: core.Script = self.scriptsMgr.get_item_by_id(int(idStr))
+                if not script:
+                    return
+                folder = script.folder
+                if not os.path.isdir(folder):
+                    return
+                if sys.platform == "win32":
+                    os.startfile(folder)
+                else:
+                    subprocess.Popen(["open", folder])
 
         except:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))

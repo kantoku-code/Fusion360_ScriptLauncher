@@ -143,3 +143,44 @@ body {
   margin-left: 0;
   margin-right: 0;
 }
+
+/* ---- context menu ---- */
+.ctx-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 140px;
+  padding: 2px 0;
+  background: #ffffff;
+  border: 1px solid #cccccc;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+}
+.ctx-item {
+  padding: 4px 12px;
+  line-height: 20px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ctx-item:hover {
+  background: #e7f4f9;
+}
+
+/* ---- tooltip ---- */
+.tooltip {
+  position: fixed;
+  z-index: 1001;
+  pointer-events: none;
+  max-width: 280px;
+  padding: 4px 8px;
+  background: #ffffe1;
+  border: 1px solid #999999;
+  box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ctx-menu[hidden],
+.tooltip[hidden] {
+  display: none;
+}
