@@ -7,7 +7,7 @@
 		"ja":	"スクリプトをツリー状のメニューから簡単に実行できるようにするアドインです。",
 		"":	"A tree-like menu to simplify the sequential execution of scripts."
 	},
-	"version":	"0.0.17",
+	"version":	"0.0.18",
 	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
 	"editEnabled":	true
