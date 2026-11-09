@@ -34,7 +34,7 @@ function applyLanguage(lang) {
   });
   document.querySelectorAll("[data-i18n-title]").forEach((el) => {
     const s = dict[el.dataset.i18nTitle];
-    if (s) el.title = s;
+    if (s) el.dataset.tooltip = s;
   });
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     const s = dict[el.dataset.i18nPlaceholder];
@@ -374,6 +374,27 @@ ctxMenuEl.addEventListener("click", (e) => {
   if (!item || ctxTargetId === null) return;
   if (item.dataset.action === "openFolder") openFolder(ctxTargetId);
   hideContextMenu();
+});
+
+// ツールバーボタンのツールチップ（スクリプト説明と同じ見た目）
+toolbarEl.addEventListener("mouseover", (e) => {
+  const btn = e.target.closest(".tv-btn");
+  if (!btn || btn.contains(e.relatedTarget)) return;
+  lastMouse = { x: e.clientX, y: e.clientY };
+  hideTooltip();
+  const text = btn.dataset.tooltip;
+  if (!text || !ctxMenuEl.hidden) return;
+  tooltipTimer = setTimeout(() => {
+    tooltipEl.textContent = text;
+    placePopup(tooltipEl, lastMouse.x, lastMouse.y, 14);
+  }, TOOLTIP_DELAY_MS);
+});
+toolbarEl.addEventListener("mouseout", (e) => {
+  const btn = e.target.closest(".tv-btn");
+  if (btn && !btn.contains(e.relatedTarget)) hideTooltip();
+});
+toolbarEl.addEventListener("mousemove", (e) => {
+  lastMouse = { x: e.clientX, y: e.clientY };
 });
 
 toolbarEl.addEventListener("click", (e) => {
