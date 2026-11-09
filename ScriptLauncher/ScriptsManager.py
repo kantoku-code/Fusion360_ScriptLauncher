@@ -4,6 +4,9 @@ import pathlib
 import traceback
 import adsk.core as core
 import re
+import json
+import base64
+import mimetypes
 from dataclasses import dataclass
 import pathlib
 
@@ -55,8 +58,37 @@ class ScriptContainer:
         """初期化後処理。表示名・アイコン・ツールチップを設定する。"""
         isInstallMark = "☆" if self._is_installation_script() else ""
         self.name = f"{isInstallMark}{self.script.name}"
-        self.icon = ICON_MAP.get(self.script.programmingLanguage, "resources/python.png")
+        self.icon = self._get_manifest_icon() or ICON_MAP.get(
+            self.script.programmingLanguage, "resources/python.png")
         self.tooltip = self.script.description
+
+    def _get_manifest_icon(self) -> str:
+        """manifest の iconFilename が有効なら data URI を返す。無い場合は None を返す。"""
+        try:
+            folder = pathlib.Path(self.script.folder)
+            manifest = folder / f"{self.script.name}.manifest"
+            if not manifest.is_file():
+                manifest = next(folder.glob("*.manifest"), None)
+            if not manifest:
+                return None
+
+            with open(manifest, encoding="utf-8-sig") as f:
+                iconName = json.load(f).get("iconFilename")
+            if not iconName:
+                return None
+
+            iconPath = folder / iconName
+            if not iconPath.is_file():
+                return None
+
+            if iconPath.suffix.lower() == ".svg":
+                mime = "image/svg+xml"
+            else:
+                mime = mimetypes.guess_type(str(iconPath))[0] or "image/png"
+            data = base64.b64encode(iconPath.read_bytes()).decode("ascii")
+            return f"data:{mime};base64,{data}"
+        except:
+            return None
 
     def toJson(self) -> dict:
         """ツリーノード用の辞書を返す。"""

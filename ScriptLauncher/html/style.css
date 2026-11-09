@@ -1,3 +1,7 @@
+html,
+body {
+  height: 100%;
+}
 html {
   margin: 0;
   padding: 0;
@@ -16,10 +20,15 @@ body {
   font-size: 1.4em;
   font-family: "Segoe UI", system-ui, sans-serif;
   color: #3b3b3b;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* ---- toolbar ---- */
 .tv-toolbar {
+  flex: none;
   display: flex;
   justify-content: flex-end;
   gap: 2px;
@@ -47,10 +56,12 @@ body {
 
 /* ---- tree ---- */
 .tv {
+  flex: 1 1 auto;
   overflow: auto;
-  min-height: 100px;
+  min-height: 0;
   border: 1px solid #e0e0e0;
   font-size: 13px;
+  font-weight: 600;
   user-select: none;
 }
 .tv-list,
