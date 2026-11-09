@@ -67,11 +67,6 @@ To uninstall, delete the copied "ScriptLauncher" folder.
 
 ---
 
-## **Libraries**:
-- [jsTree](https://www.jstree.com/) (MIT License) - icon image (`ScriptLauncher/html/resources/tree.png`) and styles based on the default theme (`ScriptLauncher/html/style.css`)
-
----
-
 ## **Environment**:
 
 The following environment is confirmed.
@@ -153,11 +148,6 @@ The following environment is confirmed.
 - **一覧の更新**
   - スクリプトの一覧は、コマンドを実行してパレットを開いたときに読み込まれます。
   - パレットを開いている間にスクリプトを追加・削除した場合は、もう一度コマンドを実行すると最新の一覧になります。
-
----
-
-## **使用ライブラリ**:
-- [jsTree](https://www.jstree.com/) (MIT License) - アイコン画像（`ScriptLauncher/html/resources/tree.png`）と default テーマを元にしたスタイル（`ScriptLauncher/html/style.css`）
 
 ---
 

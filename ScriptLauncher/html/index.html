@@ -6,7 +6,21 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <div id="tree" class="tree jstree jstree-default"></div>
+    <div class="tv-toolbar">
+      <button type="button" class="tv-btn" data-cmd="expandAll" title="すべて展開">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M4 3h8M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.2" />
+          <path d="M4 13h8" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+      <button type="button" class="tv-btn" data-cmd="collapseAll" title="すべて折りたたみ">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M4 3h8M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.2" />
+          <path d="M4 13h8" fill="none" stroke="currentColor" stroke-width="1.2" />
+        </svg>
+      </button>
+    </div>
+    <div id="tree" class="tv"></div>
     <div id="ctx-menu" class="ctx-menu" hidden>
       <div class="ctx-item" data-action="openFolder">フォルダオープン</div>
     </div>

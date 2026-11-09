@@ -54,7 +54,7 @@ _paletteInfo = {
 class MyHTMLEventHandler(core.HTMLEventHandler):
     """パレットの HTML イベントを処理するハンドラ。
 
-    htmlLoaded 時にスクリプト一覧を jsTree 形式で返し、
+    htmlLoaded 時にスクリプト一覧をツリー形式で返し、
     execScript 時に指定スクリプトを実行する。
     """
 
@@ -71,11 +71,11 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
             global _app
             if htmlArgs.action == "htmlLoaded":
                 self.scriptsMgr = ScriptsManager()
-                jstreeJson = self.scriptsMgr.get_jstree_json()
+                treeJson = self.scriptsMgr.get_tree_json()
                 args.returnData = json.dumps(
                     {
                         "action": "send",
-                        "data": jstreeJson,
+                        "data": treeJson,
                     }
                 )
 

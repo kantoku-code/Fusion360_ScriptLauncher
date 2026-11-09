@@ -45,7 +45,7 @@ ICON_MAP = {
 
 @dataclass
 class ScriptContainer:
-    """Fusion 360 スクリプト1件を保持するコンテナ。jsTree 表示に必要な情報を提供する。"""
+    """Fusion 360 スクリプト1件を保持するコンテナ。ツリー表示に必要な情報を提供する。"""
 
     id: int
     script: core.Script
@@ -59,12 +59,12 @@ class ScriptContainer:
         self.tooltip = self.script.description
 
     def toJson(self) -> dict:
-        """jsTree ノード用の辞書を返す。"""
+        """ツリーノード用の辞書を返す。"""
         return {
             "id": self.id,
             "text": self.name,
             "icon": self.icon,
-            "a_attr": {"title": self.tooltip},
+            "description": self.tooltip,
         }
 
     def _is_installation_script(self) -> bool:
@@ -82,7 +82,7 @@ class ScriptContainer:
 
 
 class ScriptsManager():
-    """Fusion 360 のスクリプト一覧を管理し、jsTree 向けデータを提供するクラス。"""
+    """Fusion 360 のスクリプト一覧を管理し、ツリー表示向けデータを提供するクラス。"""
 
     def __init__(self) -> None:
         """インストールフォルダとスクリプト一覧を初期化する。"""
@@ -142,8 +142,8 @@ class ScriptsManager():
 
         return group
 
-    def get_jstree_json(self) -> list:
-        """jsTree 用のツリーデータ（グループ＋子ノード）をリストで返す。"""
+    def get_tree_json(self) -> list:
+        """ツリーデータ（グループ＋子ノード）をリストで返す。"""
         groups = self._group_by(self.items)
         treeContent = []
         for key in groups:

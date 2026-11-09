@@ -1,85 +1,109 @@
-const ANIMATION_MS = 200;
+const ANIMATION_MS = 150;
 const TOOLTIP_DELAY_MS = 500;
 const treeEl = document.getElementById("tree");
+const toolbarEl = document.querySelector(".tv-toolbar");
 const ctxMenuEl = document.getElementById("ctx-menu");
 const tooltipEl = document.getElementById("tooltip");
 
 // ---- render ----
-function createNode(item, isLast) {
+function createNode(item, depth) {
   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
 
   const li = document.createElement("li");
-  li.className = "jstree-node " + (hasChildren ? "jstree-closed" : "jstree-leaf");
-  if (isLast) li.classList.add("jstree-last");
-  if (item.id !== undefined) li.id = String(item.id);
+  li.className = "tv-node";
   li.setAttribute("role", "treeitem");
+  if (item.id !== undefined) li.dataset.id = String(item.id);
 
-  const ocl = document.createElement("i");
-  ocl.className = "jstree-icon jstree-ocl";
-  ocl.setAttribute("role", "presentation");
-  li.appendChild(ocl);
+  const row = document.createElement("div");
+  row.className = "tv-row";
+  row.tabIndex = -1;
+  row.style.setProperty("--depth", depth);
+  if (item.description) row.dataset.description = item.description;
 
-  const a = document.createElement("a");
-  a.className = "jstree-anchor";
-  a.href = "#";
-  a.tabIndex = -1;
-  if (item.a_attr && item.a_attr.title) a.dataset.description = item.a_attr.title;
+  const twisty = document.createElement("span");
+  twisty.className = "tv-twisty";
+  row.appendChild(twisty);
 
-  const icon = document.createElement("i");
-  icon.className = "jstree-icon jstree-themeicon";
-  icon.setAttribute("role", "presentation");
   if (item.icon) {
-    icon.classList.add("jstree-themeicon-custom");
-    icon.style.backgroundImage = "url('" + item.icon + "')";
-    icon.style.backgroundPosition = "center center";
-    icon.style.backgroundSize = "auto";
+    const icon = document.createElement("img");
+    icon.className = "tv-icon";
+    icon.src = item.icon;
+    icon.alt = "";
+    icon.draggable = false;
+    row.appendChild(icon);
   }
-  a.appendChild(icon);
-  a.appendChild(document.createTextNode(item.text || ""));
-  li.appendChild(a);
+
+  const label = document.createElement("span");
+  label.className = "tv-label";
+  label.textContent = item.text || "";
+  row.appendChild(label);
+
+  li.appendChild(row);
 
   if (hasChildren) {
-    li.appendChild(createChildren(item.children, "jstree-children"));
+    li.classList.add("is-parent");
+    li.setAttribute("aria-expanded", "false");
+    li.appendChild(createChildren(item.children, depth + 1, "tv-children"));
   }
   return li;
 }
 
-function createChildren(items, className) {
+function createChildren(items, depth, className) {
   const ul = document.createElement("ul");
   ul.className = className;
   ul.setAttribute("role", "group");
-  items.forEach((item, idx) => {
-    ul.appendChild(createNode(item, idx === items.length - 1));
-  });
+  ul.style.setProperty("--depth", depth);
+  items.forEach((item) => ul.appendChild(createNode(item, depth)));
   return ul;
 }
 
 function render(data) {
-  const ul = createChildren(data, "jstree-container-ul jstree-children");
+  hideContextMenu();
+  hideTooltip();
+  const ul = createChildren(data, 0, "tv-list");
   ul.setAttribute("role", "tree");
   treeEl.replaceChildren(ul);
-  const first = ul.querySelector(".jstree-anchor");
+  const first = ul.querySelector(".tv-row");
   if (first) first.tabIndex = 0;
 }
 
-// ---- open / close ----
-function isParent(li) {
-  return li.classList.contains("jstree-open") || li.classList.contains("jstree-closed");
+// ---- helpers ----
+function nodeOf(row) {
+  return row.parentElement;
 }
 
+function rowOf(li) {
+  return li ? li.querySelector(":scope > .tv-row") : null;
+}
+
+function childrenOf(li) {
+  return li.querySelector(":scope > .tv-children");
+}
+
+function parentNodeOf(li) {
+  return li.parentElement.closest(".tv-node");
+}
+
+function isParent(li) {
+  return li.classList.contains("is-parent");
+}
+
+function isOpen(li) {
+  return li.classList.contains("is-open");
+}
+
+// ---- open / close ----
 function slide(ul, open) {
   if (ul._anim) ul._anim.cancel();
-  const full = ul.scrollHeight + "px";
-  ul.classList.add("jstree-animated");
   ul.style.display = "block";
   ul.style.overflow = "hidden";
+  const full = ul.scrollHeight + "px";
   const anim = ul.animate(
     open ? [{ height: "0px" }, { height: full }] : [{ height: full }, { height: "0px" }],
-    { duration: ANIMATION_MS, easing: "ease" }
+    { duration: ANIMATION_MS, easing: "ease-out" }
   );
   ul._anim = anim;
   const cleanup = () => {
-    ul.classList.remove("jstree-animated");
     ul.style.display = "";
     ul.style.overflow = "";
     ul._anim = null;
@@ -88,44 +112,79 @@ function slide(ul, open) {
   anim.oncancel = cleanup;
 }
 
+function applyOpen(li, open) {
+  li.classList.toggle("is-open", open);
+  li.setAttribute("aria-expanded", String(open));
+}
+
 function setOpen(li, open) {
-  if (!isParent(li) || li.classList.contains("jstree-open") === open) return;
-  li.classList.toggle("jstree-open", open);
-  li.classList.toggle("jstree-closed", !open);
-  slide(li.querySelector(":scope > .jstree-children"), open);
+  if (!isParent(li) || isOpen(li) === open) return;
+  applyOpen(li, open);
+  slide(childrenOf(li), open);
 }
 
 function toggle(li) {
-  setOpen(li, !li.classList.contains("jstree-open"));
+  setOpen(li, !isOpen(li));
+}
+
+function setAllOpen(open) {
+  treeEl.querySelectorAll(".tv-node.is-parent").forEach((li) => {
+    const ul = childrenOf(li);
+    if (ul._anim) ul._anim.cancel();
+    applyOpen(li, open);
+  });
+
+  if (open) return;
+  // フォーカス行が隠れた場合は、表示されている最も外側の祖先へ移す
+  const current = treeEl.querySelector(".tv-row[tabindex='0']");
+  if (!current || isRowVisible(current)) return;
+  let li = nodeOf(current);
+  let top = li;
+  while ((li = parentNodeOf(li))) top = li;
+  const row = rowOf(top);
+  if (document.activeElement === current) focusRow(row);
+  else setTabStop(row);
 }
 
 // ---- select / focus ----
-function select(a) {
-  treeEl.querySelectorAll(".jstree-clicked").forEach((el) => el.classList.remove("jstree-clicked"));
-  a.classList.add("jstree-clicked");
+function select(row) {
+  treeEl.querySelectorAll(".tv-row.is-selected").forEach((el) => el.classList.remove("is-selected"));
+  row.classList.add("is-selected");
 }
 
-function focusAnchor(a) {
-  if (!a) return;
-  treeEl.querySelectorAll(".jstree-anchor[tabindex='0']").forEach((el) => (el.tabIndex = -1));
-  a.tabIndex = 0;
-  a.focus();
+function setTabStop(row) {
+  treeEl.querySelectorAll(".tv-row[tabindex='0']").forEach((el) => (el.tabIndex = -1));
+  row.tabIndex = 0;
 }
 
-function visibleAnchors() {
-  return Array.from(treeEl.querySelectorAll(".jstree-anchor")).filter((a) => {
-    let li = a.parentElement.parentElement.closest(".jstree-node");
-    while (li) {
-      if (!li.classList.contains("jstree-open")) return false;
-      li = li.parentElement.closest(".jstree-node");
-    }
-    return true;
-  });
+function focusRow(row) {
+  if (!row) return;
+  setTabStop(row);
+  row.focus();
 }
 
+function isRowVisible(row) {
+  let li = parentNodeOf(nodeOf(row));
+  while (li) {
+    if (!isOpen(li)) return false;
+    li = parentNodeOf(li);
+  }
+  return true;
+}
+
+function visibleRows() {
+  return Array.from(treeEl.querySelectorAll(".tv-row")).filter(isRowVisible);
+}
+
+// ---- fusion ----
 function execScript(li) {
   if (!window.adsk) return;
-  adsk.fusionSendData("execScript", JSON.stringify({ id: li.id }));
+  adsk.fusionSendData("execScript", JSON.stringify({ id: li.dataset.id }));
+}
+
+function openFolder(id) {
+  if (!window.adsk) return;
+  adsk.fusionSendData("openFolder", JSON.stringify({ id: id }));
 }
 
 // ---- popup position ----
@@ -155,10 +214,10 @@ function hideTooltip() {
   tooltipEl.hidden = true;
 }
 
-function scheduleTooltip(a) {
+function scheduleTooltip(row) {
   hideTooltip();
-  const text = a.dataset.description;
-  if (!text || isParent(a.parentElement) || !ctxMenuEl.hidden) return;
+  const text = row.dataset.description;
+  if (!text || isParent(nodeOf(row)) || !ctxMenuEl.hidden) return;
   tooltipTimer = setTimeout(() => {
     tooltipEl.textContent = text;
     placePopup(tooltipEl, lastMouse.x, lastMouse.y, 14);
@@ -173,42 +232,58 @@ function hideContextMenu() {
   ctxTargetId = null;
 }
 
-function openFolder(id) {
-  if (!window.adsk) return;
-  adsk.fusionSendData("openFolder", JSON.stringify({ id: id }));
+function hidePopups() {
+  hideContextMenu();
+  hideTooltip();
 }
 
-// ---- events ----
+// ---- events: mouse ----
 treeEl.addEventListener("mouseover", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (a && !a.contains(e.relatedTarget)) {
-    a.classList.add("jstree-hovered");
+  const row = e.target.closest(".tv-row");
+  if (row && !row.contains(e.relatedTarget)) {
     lastMouse = { x: e.clientX, y: e.clientY };
-    scheduleTooltip(a);
+    scheduleTooltip(row);
   }
 });
 treeEl.addEventListener("mouseout", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (a && !a.contains(e.relatedTarget)) {
-    a.classList.remove("jstree-hovered");
-    hideTooltip();
-  }
+  const row = e.target.closest(".tv-row");
+  if (row && !row.contains(e.relatedTarget)) hideTooltip();
 });
 treeEl.addEventListener("mousemove", (e) => {
   lastMouse = { x: e.clientX, y: e.clientY };
 });
 
+treeEl.addEventListener("click", (e) => {
+  const row = e.target.closest(".tv-row");
+  if (!row) return;
+  if (e.target.closest(".tv-twisty")) {
+    toggle(nodeOf(row));
+    return;
+  }
+  select(row);
+  focusRow(row);
+});
+
+treeEl.addEventListener("dblclick", (e) => {
+  const row = e.target.closest(".tv-row");
+  if (!row || e.target.closest(".tv-twisty")) return;
+  const sel = window.getSelection && window.getSelection();
+  if (sel) sel.removeAllRanges();
+  const li = nodeOf(row);
+  if (isParent(li)) toggle(li);
+  else execScript(li);
+});
+
 treeEl.addEventListener("contextmenu", (e) => {
   e.preventDefault();
-  hideTooltip();
-  hideContextMenu();
-  const a = e.target.closest(".jstree-anchor");
-  if (!a) return;
-  const li = a.parentElement;
-  if (isParent(li) || !/^\d+$/.test(li.id)) return;
-  select(a);
-  focusAnchor(a);
-  ctxTargetId = li.id;
+  hidePopups();
+  const row = e.target.closest(".tv-row");
+  if (!row) return;
+  const li = nodeOf(row);
+  if (isParent(li) || !/^\d+$/.test(li.dataset.id || "")) return;
+  select(row);
+  focusRow(row);
+  ctxTargetId = li.dataset.id;
   placePopup(ctxMenuEl, e.clientX, e.clientY, 2);
 });
 
@@ -220,101 +295,62 @@ ctxMenuEl.addEventListener("click", (e) => {
   hideContextMenu();
 });
 
+toolbarEl.addEventListener("click", (e) => {
+  const btn = e.target.closest(".tv-btn");
+  if (!btn) return;
+  hidePopups();
+  if (btn.dataset.cmd === "expandAll") setAllOpen(true);
+  else if (btn.dataset.cmd === "collapseAll") setAllOpen(false);
+});
+
 document.addEventListener("mousedown", (e) => {
   hideTooltip();
   if (!ctxMenuEl.contains(e.target)) hideContextMenu();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    hideContextMenu();
-    hideTooltip();
-  }
+  if (e.key === "Escape") hidePopups();
 });
-treeEl.addEventListener("scroll", () => {
-  hideContextMenu();
-  hideTooltip();
-});
-window.addEventListener("scroll", () => {
-  hideContextMenu();
-  hideTooltip();
-});
-window.addEventListener("blur", () => {
-  hideContextMenu();
-  hideTooltip();
-});
+treeEl.addEventListener("scroll", hidePopups);
+window.addEventListener("scroll", hidePopups);
+window.addEventListener("blur", hidePopups);
 
-treeEl.addEventListener("click", (e) => {
-  const ocl = e.target.closest(".jstree-ocl");
-  if (ocl) {
-    toggle(ocl.parentElement);
-    return;
-  }
-  const a = e.target.closest(".jstree-anchor");
-  if (!a) return;
-  e.preventDefault();
-  select(a);
-  focusAnchor(a);
-});
-
-treeEl.addEventListener("dblclick", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (!a) return;
-  const sel = window.getSelection && window.getSelection();
-  if (sel) sel.removeAllRanges();
-  const li = a.parentElement;
-  if (isParent(li)) {
-    toggle(li);
-  } else {
-    execScript(li);
-  }
-});
-
+// ---- events: keyboard ----
 treeEl.addEventListener("keydown", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (!a) return;
-  const li = a.parentElement;
-  const list = visibleAnchors();
-  const idx = list.indexOf(a);
+  const row = e.target.closest(".tv-row");
+  if (!row) return;
+  const li = nodeOf(row);
+  const list = visibleRows();
+  const idx = list.indexOf(row);
   switch (e.key) {
     case "ArrowUp":
-      focusAnchor(list[idx - 1]);
+      focusRow(list[idx - 1]);
       break;
     case "ArrowDown":
-      focusAnchor(list[idx + 1]);
+      focusRow(list[idx + 1]);
       break;
     case "ArrowRight":
-      if (li.classList.contains("jstree-closed")) setOpen(li, true);
-      else if (li.classList.contains("jstree-open")) focusAnchor(li.querySelector(":scope > .jstree-children .jstree-anchor"));
-      break;
-    case "ArrowLeft":
-      if (li.classList.contains("jstree-open")) setOpen(li, false);
-      else {
-        const parent = li.parentElement.closest(".jstree-node");
-        if (parent) focusAnchor(parent.querySelector(":scope > .jstree-anchor"));
+      if (isParent(li)) {
+        if (!isOpen(li)) setOpen(li, true);
+        else focusRow(rowOf(childrenOf(li).querySelector(":scope > .tv-node")));
       }
       break;
+    case "ArrowLeft":
+      if (isParent(li) && isOpen(li)) setOpen(li, false);
+      else focusRow(rowOf(parentNodeOf(li)));
+      break;
     case "Home":
-      focusAnchor(list[0]);
+      focusRow(list[0]);
       break;
     case "End":
-      focusAnchor(list[list.length - 1]);
+      focusRow(list[list.length - 1]);
       break;
     case "Enter":
-      select(a);
+      select(row);
       break;
     default:
       return;
   }
   e.preventDefault();
-});
-
-treeEl.addEventListener("focusin", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (a) a.classList.add("jstree-hovered");
-});
-treeEl.addEventListener("focusout", (e) => {
-  const a = e.target.closest(".jstree-anchor");
-  if (a && !a.matches(":hover")) a.classList.remove("jstree-hovered");
 });
 
 // ---- init ----
