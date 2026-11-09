@@ -51,6 +51,35 @@ _paletteInfo = {
 }
 
 
+# Fusion の表示言語 → manifest と同じ LCID 文字列
+_LANGUAGE_CODES = {
+    core.UserLanguages.ChinesePRCLanguage: "2052",
+    core.UserLanguages.ChineseTaiwanLanguage: "1028",
+    core.UserLanguages.CzechLanguage: "1029",
+    core.UserLanguages.EnglishLanguage: "1033",
+    core.UserLanguages.FrenchLanguage: "1036",
+    core.UserLanguages.GermanLanguage: "1031",
+    core.UserLanguages.HungarianLanguage: "1038",
+    core.UserLanguages.ItalianLanguage: "1040",
+    core.UserLanguages.JapaneseLanguage: "1041",
+    core.UserLanguages.KoreanLanguage: "1042",
+    core.UserLanguages.PolishLanguage: "1045",
+    core.UserLanguages.PortugueseBrazilianLanguage: "1046",
+    core.UserLanguages.RussianLanguage: "1049",
+    core.UserLanguages.SpanishLanguage: "1034",
+    core.UserLanguages.TurkishLanguage: "1055",
+}
+
+
+def get_language_code() -> str:
+    """Fusion の表示言語を LCID 文字列で返す。取得できない場合は英語。"""
+    try:
+        lang = core.Application.get().preferences.generalPreferences.userLanguage
+        return _LANGUAGE_CODES.get(lang, "1033")
+    except:
+        return "1033"
+
+
 class MyHTMLEventHandler(core.HTMLEventHandler):
     """パレットの HTML イベントを処理するハンドラ。
 
@@ -76,6 +105,7 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                     {
                         "action": "send",
                         "data": treeJson,
+                        "lang": get_language_code(),
                     }
                 )
 

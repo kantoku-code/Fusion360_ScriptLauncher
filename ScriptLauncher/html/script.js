@@ -4,6 +4,43 @@ const treeEl = document.getElementById("tree");
 const toolbarEl = document.querySelector(".tv-toolbar");
 const ctxMenuEl = document.getElementById("ctx-menu");
 const tooltipEl = document.getElementById("tooltip");
+const searchEl = document.getElementById("search");
+const SEARCH_DELAY_MS = 150;
+
+// ---- i18n ----（キーは manifest と同じ LCID）
+const I18N = {
+  1033: { search: "Search (* ? allowed)", expandAll: "Expand All", collapseAll: "Collapse All", openFolder: "Open Folder" },
+  2052: { search: "搜索 (可使用 * ?)", expandAll: "全部展开", collapseAll: "全部折叠", openFolder: "打开文件夹" },
+  1028: { search: "搜尋 (可使用 * ?)", expandAll: "全部展開", collapseAll: "全部摺疊", openFolder: "開啟資料夾" },
+  1029: { search: "Hledat (lze použít * ?)", expandAll: "Rozbalit vše", collapseAll: "Sbalit vše", openFolder: "Otevřít složku" },
+  1036: { search: "Rechercher (* ? autorisés)", expandAll: "Tout développer", collapseAll: "Tout réduire", openFolder: "Ouvrir le dossier" },
+  1031: { search: "Suchen (* ? möglich)", expandAll: "Alle erweitern", collapseAll: "Alle reduzieren", openFolder: "Ordner öffnen" },
+  1038: { search: "Keresés (* ? használható)", expandAll: "Összes kibontása", collapseAll: "Összes összecsukása", openFolder: "Mappa megnyitása" },
+  1040: { search: "Cerca (* ? consentiti)", expandAll: "Espandi tutto", collapseAll: "Comprimi tutto", openFolder: "Apri cartella" },
+  1041: { search: "検索 (* ? 使用可)", expandAll: "すべて展開", collapseAll: "すべて折りたたみ", openFolder: "フォルダオープン" },
+  1042: { search: "검색 (* ? 사용 가능)", expandAll: "모두 펼치기", collapseAll: "모두 접기", openFolder: "폴더 열기" },
+  1045: { search: "Szukaj (można użyć * ?)", expandAll: "Rozwiń wszystko", collapseAll: "Zwiń wszystko", openFolder: "Otwórz folder" },
+  1046: { search: "Pesquisar (* ? permitidos)", expandAll: "Expandir tudo", collapseAll: "Recolher tudo", openFolder: "Abrir pasta" },
+  1049: { search: "Поиск (можно * ?)", expandAll: "Развернуть все", collapseAll: "Свернуть все", openFolder: "Открыть папку" },
+  1034: { search: "Buscar (se permite * ?)", expandAll: "Expandir todo", collapseAll: "Contraer todo", openFolder: "Abrir carpeta" },
+  1055: { search: "Ara (* ? kullanılabilir)", expandAll: "Tümünü genişlet", collapseAll: "Tümünü daralt", openFolder: "Klasörü aç" },
+};
+
+function applyLanguage(lang) {
+  const dict = I18N[lang] || I18N[1033];
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const s = dict[el.dataset.i18n];
+    if (s) el.textContent = s;
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    const s = dict[el.dataset.i18nTitle];
+    if (s) el.title = s;
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    const s = dict[el.dataset.i18nPlaceholder];
+    if (s) el.placeholder = s;
+  });
+}
 
 // ---- render ----
 function createNode(item, depth) {
@@ -65,6 +102,7 @@ function render(data) {
   treeEl.replaceChildren(ul);
   const first = ul.querySelector(".tv-row");
   if (first) first.tabIndex = 0;
+  applySearch(searchEl.value);
 }
 
 // ---- helpers ----
@@ -174,6 +212,49 @@ function isRowVisible(row) {
 
 function visibleRows() {
   return Array.from(treeEl.querySelectorAll(".tv-row")).filter(isRowVisible);
+}
+
+// ---- search ----
+// ワイルドカード（* ?）を部分一致・大文字小文字無視の正規表現に変換する
+function wildcardToRegExp(text) {
+  const escaped = text.replace(/[.+^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(escaped.replace(/\*/g, ".*").replace(/\?/g, "."), "i");
+}
+
+function applySearch(text) {
+  treeEl.querySelectorAll(".tv-row.is-match").forEach((el) => el.classList.remove("is-match"));
+  const query = (text || "").trim();
+  if (!query) return;
+
+  const re = wildcardToRegExp(query);
+  let firstHit = null;
+  treeEl.querySelectorAll(".tv-node:not(.is-parent) > .tv-row").forEach((row) => {
+    const label = row.querySelector(".tv-label");
+    const name = label ? label.textContent : "";
+    const desc = row.dataset.description || "";
+    if (re.test(name) || re.test(desc)) {
+      row.classList.add("is-match");
+      if (!firstHit) firstHit = row;
+    }
+  });
+
+  // ヒットを含むグループは開き、含まないグループは閉じる
+  treeEl.querySelectorAll(".tv-node.is-parent").forEach((li) => {
+    const ul = childrenOf(li);
+    if (ul._anim) ul._anim.cancel();
+    applyOpen(li, !!ul.querySelector(".tv-row.is-match"));
+  });
+
+  // フォーカス行が隠れた場合は、表示されている最も外側の祖先へ移す
+  const current = treeEl.querySelector(".tv-row[tabindex='0']");
+  if (current && !isRowVisible(current)) {
+    let li = nodeOf(current);
+    let top = li;
+    while ((li = parentNodeOf(li))) top = li;
+    setTabStop(rowOf(top));
+  }
+
+  if (firstHit) firstHit.scrollIntoView({ block: "nearest" });
 }
 
 // ---- fusion ----
@@ -303,6 +384,19 @@ toolbarEl.addEventListener("click", (e) => {
   else if (btn.dataset.cmd === "collapseAll") setAllOpen(false);
 });
 
+let searchTimer = null;
+searchEl.addEventListener("input", () => {
+  hidePopups();
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => applySearch(searchEl.value), SEARCH_DELAY_MS);
+});
+searchEl.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  clearTimeout(searchTimer);
+  searchEl.value = "";
+  applySearch("");
+});
+
 document.addEventListener("mousedown", (e) => {
   hideTooltip();
   if (!ctxMenuEl.contains(e.target)) hideContextMenu();
@@ -365,7 +459,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       adsk.fusionSendData("htmlLoaded", "").then((ret) => {
         let obj = JSON.parse(ret || "null");
-        if (!obj || !obj.data) return;
+        if (!obj) return;
+        applyLanguage(obj.lang);
+        if (!obj.data) return;
         render(obj.data);
       });
     }
