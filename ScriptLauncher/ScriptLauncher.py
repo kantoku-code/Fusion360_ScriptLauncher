@@ -20,13 +20,11 @@ _cmdInfo = {
     "name": "Script Launcher",
     "tooltip": "This is an experimental and simplified script menu.",
     "resources": "resources",
-    "panelIds": ("SolidScriptsAddinsPanel", "CAMScriptsAddinsPanel")
 }
 
 # アドインパネルを持たないワークスペースへの追加設定
 _extraWorkspaceIds = (
     "FusionRenderEnvironment",          # レンダリング
-    "FusionDocumentationEnvironment",   # 図面
 )
 _TAB_ID = "kantoku_ToolsTab"
 _PANEL_ID = "kantoku_SolidScriptsAddinsPanel"
@@ -76,7 +74,7 @@ def get_language_code() -> str:
     try:
         lang = core.Application.get().preferences.generalPreferences.userLanguage
         return _LANGUAGE_CODES.get(lang, "1033")
-    except:
+    except Exception:
         return "1033"
 
 
@@ -138,7 +136,7 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                 else:
                     subprocess.Popen(["open", folder])
 
-        except:
+        except Exception:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
 
@@ -175,7 +173,7 @@ def initPallet(keepIfVisible=False):
             else:
                 palette.setPosition(geo["left"], geo["top"])
                 palette.setSize(geo["width"], geo["height"])
-        except:
+        except Exception:
             _app.log("Failed to restore palette geometry:\n{}".format(
                 traceback.format_exc()))
             palette.setPosition(800, 400)
@@ -205,7 +203,7 @@ class ShowPaletteCommandExecuteHandler(core.CommandEventHandler):
             global _palette_visible
             _palette_visible = True
             initPallet()
-        except:
+        except Exception:
             _ui.messageBox("Command executed failed: {}".format(
                 traceback.format_exc()))
 
@@ -223,7 +221,7 @@ class MyCloseEventHandler(core.UserInterfaceGeneralEventHandler):
             if _is_stopping:
                 return
             _palette_visible = False
-        except:
+        except Exception:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
 
@@ -245,7 +243,7 @@ class MyWorkspacePreDeactivateHandler(core.WorkspaceEventHandler):
                     "height": palette.height,
                     "dockingState": palette.dockingState,
                 }
-        except:
+        except Exception:
             core.Application.get().log(
                 "Failed:\n{}".format(traceback.format_exc()))
 
@@ -260,7 +258,7 @@ class MyWorkspaceActivatedHandler(core.WorkspaceEventHandler):
         try:
             if _palette_visible and not _is_stopping:
                 initPallet(keepIfVisible=True)
-        except:
+        except Exception:
             core.Application.get().log(
                 "Failed:\n{}".format(traceback.format_exc()))
 
@@ -278,7 +276,7 @@ class ShowPaletteCommandCreatedHandler(core.CommandCreatedEventHandler):
             onExecute = ShowPaletteCommandExecuteHandler()
             command.execute.add(onExecute)
             handlers.append(onExecute)
-        except:
+        except Exception:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
 
@@ -293,7 +291,7 @@ def find_utilities_tab(ws: core.Workspace, name: str) -> core.ToolbarTab:
 
 
 def add_to_extra_workspaces(cmdDef: core.CommandDefinition):
-    """レンダリング・図面のユーティリティタブにアドインパネルを用意し、
+    """レンダリングのユーティリティタブにアドインパネルを用意し、
     標準のアドインパネルのコマンドと本コマンドを追加する。
 
     ユーティリティタブが無ければ生成し、タブ内にアドインパネルが無ければ生成する。
@@ -363,7 +361,7 @@ def remove_from_extra_workspaces():
             if tab.isValid and tab.id == _TAB_ID \
                     and tab.toolbarPanels.count == 0:
                 tab.deleteMe()
-        except:
+        except Exception:
             _app.log("Failed:\n{}".format(traceback.format_exc()))
     _extraPanels.clear()
 
@@ -394,15 +392,12 @@ def run(context):
         showPaletteCmdDef.commandCreated.add(onCommandCreated)
         handlers.append(onCommandCreated)
 
-        for panelId in _cmdInfo["panelIds"]:
-            panel = _ui.allToolbarPanels.itemById(panelId)
-            if not panel:
-                continue
-            cntrl = panel.controls.itemById(_cmdInfo["id"])
-            if not cntrl:
-                panel.controls.addCommand(showPaletteCmdDef)
+        # QAT(Quick Access Toolbar)に追加する
+        qat = _ui.toolbars.itemById("QAT")
+        if qat and not qat.controls.itemById(_cmdInfo["id"]):
+            qat.controls.addCommand(showPaletteCmdDef)
 
-        # レンダリング・図面のアドインパネルに追加する
+        # レンダリングのアドインパネルに追加する
         add_to_extra_workspaces(showPaletteCmdDef)
 
         # ワークスペース切替で破棄されたパレットを再作成する
@@ -413,7 +408,7 @@ def run(context):
         onActivated = MyWorkspaceActivatedHandler()
         _ui.workspaceActivated.add(onActivated)
         _workspace_handlers.append((_ui.workspaceActivated, onActivated))
-    except:
+    except Exception:
         if _ui:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
@@ -425,7 +420,7 @@ def stop(context):
     for event, handler in _workspace_handlers:
         try:
             event.remove(handler)
-        except:
+        except Exception:
             pass
     _workspace_handlers.clear()
 
@@ -436,11 +431,9 @@ def stop(context):
             palette.deleteMe()
 
         global _cmdInfo
-        for panelId in _cmdInfo["panelIds"]:
-            panel = _ui.allToolbarPanels.itemById(panelId)
-            if not panel:
-                continue
-            cmd = panel.controls.itemById(_cmdInfo["id"])
+        qat = _ui.toolbars.itemById("QAT")
+        if qat:
+            cmd = qat.controls.itemById(_cmdInfo["id"])
             if cmd:
                 cmd.deleteMe()
 
@@ -451,6 +444,6 @@ def stop(context):
             cmdDef.deleteMe()
 
         _app.log("Stop addin")
-    except:
+    except Exception:
         if _ui:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
