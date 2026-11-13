@@ -20,12 +20,34 @@
           <path d="M4 13h8" fill="none" stroke="currentColor" stroke-width="1.2" />
         </svg>
       </button>
+      <button type="button" class="tv-btn" data-cmd="settings" data-tooltip="Settings" data-i18n-title="settings">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path
+            d="M6.9 1.5h2.2l.4 1.8 1.1.5 1.6-1 1.5 1.5-1 1.6.5 1.1 1.8.4v2.2l-1.8.4-.5 1.1 1 1.6-1.5 1.5-1.6-1-1.1.5-.4 1.8H6.9l-.4-1.8-1.1-.5-1.6 1-1.5-1.5 1-1.6-.5-1.1-1.8-.4V6.9l1.8-.4.5-1.1-1-1.6 1.5-1.5 1.6 1 1.1-.5z"
+            fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" />
+          <circle cx="8" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.1" />
+        </svg>
+      </button>
     </div>
     <div id="tree" class="tv"></div>
     <div id="ctx-menu" class="ctx-menu" hidden>
       <div class="ctx-item" data-action="openFolder" data-i18n="openFolder">Open Folder</div>
     </div>
     <div id="tooltip" class="tooltip" hidden></div>
+    <div id="settings" class="settings" hidden>
+      <div class="settings-backdrop"></div>
+      <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="settings-header">
+          <span id="settings-title" class="settings-title" data-i18n="settings">Settings</span>
+          <button type="button" class="settings-close" aria-label="Close">
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+              <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.2" />
+            </svg>
+          </button>
+        </div>
+        <div id="settings-body" class="settings-body"></div>
+      </div>
+    </div>
 
     <script src="./script.js"></script>
   </body>

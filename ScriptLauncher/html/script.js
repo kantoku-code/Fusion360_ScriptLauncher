@@ -6,24 +6,29 @@ const ctxMenuEl = document.getElementById("ctx-menu");
 const tooltipEl = document.getElementById("tooltip");
 const searchEl = document.getElementById("search");
 const SEARCH_DELAY_MS = 150;
+const SETTINGS_ANIMATION_MS = 200;
+const settingsEl = document.getElementById("settings");
+const settingsPanelEl = settingsEl.querySelector(".settings-panel");
+const settingsCloseEl = settingsEl.querySelector(".settings-close");
+const settingsBtnEl = toolbarEl.querySelector('.tv-btn[data-cmd="settings"]');
 
 // ---- i18n ----（キーは manifest と同じ LCID）
 const I18N = {
-  1033: { search: "Search (* ? allowed)", expandAll: "Expand All", collapseAll: "Collapse All", openFolder: "Open Folder" },
-  2052: { search: "搜索 (可使用 * ?)", expandAll: "全部展开", collapseAll: "全部折叠", openFolder: "打开文件夹" },
-  1028: { search: "搜尋 (可使用 * ?)", expandAll: "全部展開", collapseAll: "全部摺疊", openFolder: "開啟資料夾" },
-  1029: { search: "Hledat (lze použít * ?)", expandAll: "Rozbalit vše", collapseAll: "Sbalit vše", openFolder: "Otevřít složku" },
-  1036: { search: "Rechercher (* ? autorisés)", expandAll: "Tout développer", collapseAll: "Tout réduire", openFolder: "Ouvrir le dossier" },
-  1031: { search: "Suchen (* ? möglich)", expandAll: "Alle erweitern", collapseAll: "Alle reduzieren", openFolder: "Ordner öffnen" },
-  1038: { search: "Keresés (* ? használható)", expandAll: "Összes kibontása", collapseAll: "Összes összecsukása", openFolder: "Mappa megnyitása" },
-  1040: { search: "Cerca (* ? consentiti)", expandAll: "Espandi tutto", collapseAll: "Comprimi tutto", openFolder: "Apri cartella" },
-  1041: { search: "検索 (* ? 使用可)", expandAll: "すべて展開", collapseAll: "すべて折りたたみ", openFolder: "フォルダオープン" },
-  1042: { search: "검색 (* ? 사용 가능)", expandAll: "모두 펼치기", collapseAll: "모두 접기", openFolder: "폴더 열기" },
-  1045: { search: "Szukaj (można użyć * ?)", expandAll: "Rozwiń wszystko", collapseAll: "Zwiń wszystko", openFolder: "Otwórz folder" },
-  1046: { search: "Pesquisar (* ? permitidos)", expandAll: "Expandir tudo", collapseAll: "Recolher tudo", openFolder: "Abrir pasta" },
-  1049: { search: "Поиск (можно * ?)", expandAll: "Развернуть все", collapseAll: "Свернуть все", openFolder: "Открыть папку" },
-  1034: { search: "Buscar (se permite * ?)", expandAll: "Expandir todo", collapseAll: "Contraer todo", openFolder: "Abrir carpeta" },
-  1055: { search: "Ara (* ? kullanılabilir)", expandAll: "Tümünü genişlet", collapseAll: "Tümünü daralt", openFolder: "Klasörü aç" },
+  1033: { search: "Search (* ? allowed)", expandAll: "Expand All", collapseAll: "Collapse All", openFolder: "Open Folder", settings: "Settings" },
+  2052: { search: "搜索 (可使用 * ?)", expandAll: "全部展开", collapseAll: "全部折叠", openFolder: "打开文件夹", settings: "设置" },
+  1028: { search: "搜尋 (可使用 * ?)", expandAll: "全部展開", collapseAll: "全部摺疊", openFolder: "開啟資料夾", settings: "設定" },
+  1029: { search: "Hledat (lze použít * ?)", expandAll: "Rozbalit vše", collapseAll: "Sbalit vše", openFolder: "Otevřít složku", settings: "Nastavení" },
+  1036: { search: "Rechercher (* ? autorisés)", expandAll: "Tout développer", collapseAll: "Tout réduire", openFolder: "Ouvrir le dossier", settings: "Paramètres" },
+  1031: { search: "Suchen (* ? möglich)", expandAll: "Alle erweitern", collapseAll: "Alle reduzieren", openFolder: "Ordner öffnen", settings: "Einstellungen" },
+  1038: { search: "Keresés (* ? használható)", expandAll: "Összes kibontása", collapseAll: "Összes összecsukása", openFolder: "Mappa megnyitása", settings: "Beállítások" },
+  1040: { search: "Cerca (* ? consentiti)", expandAll: "Espandi tutto", collapseAll: "Comprimi tutto", openFolder: "Apri cartella", settings: "Impostazioni" },
+  1041: { search: "検索 (* ? 使用可)", expandAll: "すべて展開", collapseAll: "すべて折りたたみ", openFolder: "フォルダオープン", settings: "設定" },
+  1042: { search: "검색 (* ? 사용 가능)", expandAll: "모두 펼치기", collapseAll: "모두 접기", openFolder: "폴더 열기", settings: "설정" },
+  1045: { search: "Szukaj (można użyć * ?)", expandAll: "Rozwiń wszystko", collapseAll: "Zwiń wszystko", openFolder: "Otwórz folder", settings: "Ustawienia" },
+  1046: { search: "Pesquisar (* ? permitidos)", expandAll: "Expandir tudo", collapseAll: "Recolher tudo", openFolder: "Abrir pasta", settings: "Configurações" },
+  1049: { search: "Поиск (можно * ?)", expandAll: "Развернуть все", collapseAll: "Свернуть все", openFolder: "Открыть папку", settings: "Настройки" },
+  1034: { search: "Buscar (se permite * ?)", expandAll: "Expandir todo", collapseAll: "Contraer todo", openFolder: "Abrir carpeta", settings: "Configuración" },
+  1055: { search: "Ara (* ? kullanılabilir)", expandAll: "Tümünü genişlet", collapseAll: "Tümünü daralt", openFolder: "Klasörü aç", settings: "Ayarlar" },
 };
 
 function applyLanguage(lang) {
@@ -318,6 +323,37 @@ function hidePopups() {
   hideTooltip();
 }
 
+// ---- settings ----
+let settingsTimer = null;
+
+function isSettingsOpen() {
+  return settingsEl.classList.contains("is-open");
+}
+
+function openSettings() {
+  if (isSettingsOpen()) return;
+  hidePopups();
+  clearTimeout(settingsTimer);
+  settingsEl.hidden = false;
+  void settingsPanelEl.offsetHeight; // reflow してから transition を開始する
+  settingsEl.classList.add("is-open");
+  settingsCloseEl.focus();
+}
+
+function closeSettings() {
+  if (!isSettingsOpen()) return;
+  settingsEl.classList.remove("is-open");
+  clearTimeout(settingsTimer);
+  // transitionend が来ない場合の保険を兼ねて、アニメーション時間後に非表示にする
+  settingsTimer = setTimeout(() => {
+    if (!isSettingsOpen()) settingsEl.hidden = true;
+  }, SETTINGS_ANIMATION_MS);
+  settingsBtnEl.focus();
+}
+
+settingsCloseEl.addEventListener("click", closeSettings);
+settingsEl.querySelector(".settings-backdrop").addEventListener("click", closeSettings);
+
 // ---- events: mouse ----
 treeEl.addEventListener("mouseover", (e) => {
   const row = e.target.closest(".tv-row");
@@ -403,6 +439,7 @@ toolbarEl.addEventListener("click", (e) => {
   hidePopups();
   if (btn.dataset.cmd === "expandAll") setAllOpen(true);
   else if (btn.dataset.cmd === "collapseAll") setAllOpen(false);
+  else if (btn.dataset.cmd === "settings") openSettings();
 });
 
 let searchTimer = null;
@@ -423,7 +460,12 @@ document.addEventListener("mousedown", (e) => {
   if (!ctxMenuEl.contains(e.target)) hideContextMenu();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") hidePopups();
+  if (e.key !== "Escape") return;
+  if (isSettingsOpen()) {
+    e.preventDefault();
+    closeSettings();
+  }
+  hidePopups();
 });
 treeEl.addEventListener("scroll", hidePopups);
 window.addEventListener("scroll", hidePopups);
