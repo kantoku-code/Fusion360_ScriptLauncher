@@ -78,6 +78,41 @@ def get_language_code() -> str:
         return "1033"
 
 
+# ---- settings ----
+_SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "setting.json")
+_DEFAULT_SETTINGS = {
+    "theme": "light",       # "light" / "dark"
+    "transparent": True,    # 非ホバー時に背景を透明にする
+}
+
+
+def normalize_settings(data) -> dict:
+    """デフォルトとマージし、不正な値はデフォルトに戻した設定を返す。"""
+    settings = dict(_DEFAULT_SETTINGS)
+    if not isinstance(data, dict):
+        return settings
+    if data.get("theme") in ("light", "dark"):
+        settings["theme"] = data["theme"]
+    if isinstance(data.get("transparent"), bool):
+        settings["transparent"] = data["transparent"]
+    return settings
+
+
+def load_settings() -> dict:
+    """setting.json を読み込む。無い・壊れている場合はデフォルト。"""
+    try:
+        with open(_SETTINGS_PATH, "r", encoding="utf-8") as f:
+            return normalize_settings(json.load(f))
+    except Exception:
+        return dict(_DEFAULT_SETTINGS)
+
+
+def save_settings(data) -> None:
+    """設定を検証して setting.json に保存する。"""
+    with open(_SETTINGS_PATH, "w", encoding="utf-8") as f:
+        json.dump(normalize_settings(data), f, indent=2)
+
+
 class MyHTMLEventHandler(core.HTMLEventHandler):
     """パレットの HTML イベントを処理するハンドラ。
 
@@ -104,8 +139,12 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                         "action": "send",
                         "data": treeJson,
                         "lang": get_language_code(),
+                        "settings": load_settings(),
                     }
                 )
+
+            elif htmlArgs.action == "saveSettings":
+                save_settings(json.loads(htmlArgs.data))
 
             elif htmlArgs.action == "execScript":
                 if not self.scriptsMgr:

@@ -131,3 +131,4 @@ dmypy.json
 # fusion360API
 .vscode/
 temp/
+ScriptLauncher/setting.json

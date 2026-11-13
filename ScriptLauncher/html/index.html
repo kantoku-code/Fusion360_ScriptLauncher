@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="is-transparent">
   <head>
     <meta charset="UTF-8" />
     <title>Script Launcher</title>
@@ -45,7 +45,19 @@
             </svg>
           </button>
         </div>
-        <div id="settings-body" class="settings-body"></div>
+        <div id="settings-body" class="settings-body">
+          <div class="settings-row">
+            <label for="setting-theme" class="settings-label" data-i18n="theme">Color Theme</label>
+            <select id="setting-theme" class="settings-select">
+              <option value="light" data-i18n="themeLight">Light</option>
+              <option value="dark" data-i18n="themeDark">Dark</option>
+            </select>
+          </div>
+          <div class="settings-row">
+            <label for="setting-transparent" class="settings-label" data-i18n="transparent">Transparent background when not hovered</label>
+            <input type="checkbox" id="setting-transparent" class="settings-check" />
+          </div>
+        </div>
       </div>
     </div>
 

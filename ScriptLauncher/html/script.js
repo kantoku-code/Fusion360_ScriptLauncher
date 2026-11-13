@@ -14,21 +14,36 @@ const settingsBtnEl = toolbarEl.querySelector('.tv-btn[data-cmd="settings"]');
 
 // ---- i18n ----（キーは manifest と同じ LCID）
 const I18N = {
-  1033: { search: "Search (* ? allowed)", expandAll: "Expand All", collapseAll: "Collapse All", openFolder: "Open Folder", settings: "Settings" },
-  2052: { search: "搜索 (可使用 * ?)", expandAll: "全部展开", collapseAll: "全部折叠", openFolder: "打开文件夹", settings: "设置" },
-  1028: { search: "搜尋 (可使用 * ?)", expandAll: "全部展開", collapseAll: "全部摺疊", openFolder: "開啟資料夾", settings: "設定" },
-  1029: { search: "Hledat (lze použít * ?)", expandAll: "Rozbalit vše", collapseAll: "Sbalit vše", openFolder: "Otevřít složku", settings: "Nastavení" },
-  1036: { search: "Rechercher (* ? autorisés)", expandAll: "Tout développer", collapseAll: "Tout réduire", openFolder: "Ouvrir le dossier", settings: "Paramètres" },
-  1031: { search: "Suchen (* ? möglich)", expandAll: "Alle erweitern", collapseAll: "Alle reduzieren", openFolder: "Ordner öffnen", settings: "Einstellungen" },
-  1038: { search: "Keresés (* ? használható)", expandAll: "Összes kibontása", collapseAll: "Összes összecsukása", openFolder: "Mappa megnyitása", settings: "Beállítások" },
-  1040: { search: "Cerca (* ? consentiti)", expandAll: "Espandi tutto", collapseAll: "Comprimi tutto", openFolder: "Apri cartella", settings: "Impostazioni" },
-  1041: { search: "検索 (* ? 使用可)", expandAll: "すべて展開", collapseAll: "すべて折りたたみ", openFolder: "フォルダオープン", settings: "設定" },
-  1042: { search: "검색 (* ? 사용 가능)", expandAll: "모두 펼치기", collapseAll: "모두 접기", openFolder: "폴더 열기", settings: "설정" },
-  1045: { search: "Szukaj (można użyć * ?)", expandAll: "Rozwiń wszystko", collapseAll: "Zwiń wszystko", openFolder: "Otwórz folder", settings: "Ustawienia" },
-  1046: { search: "Pesquisar (* ? permitidos)", expandAll: "Expandir tudo", collapseAll: "Recolher tudo", openFolder: "Abrir pasta", settings: "Configurações" },
-  1049: { search: "Поиск (можно * ?)", expandAll: "Развернуть все", collapseAll: "Свернуть все", openFolder: "Открыть папку", settings: "Настройки" },
-  1034: { search: "Buscar (se permite * ?)", expandAll: "Expandir todo", collapseAll: "Contraer todo", openFolder: "Abrir carpeta", settings: "Configuración" },
-  1055: { search: "Ara (* ? kullanılabilir)", expandAll: "Tümünü genişlet", collapseAll: "Tümünü daralt", openFolder: "Klasörü aç", settings: "Ayarlar" },
+  1033: { search: "Search (* ? allowed)", expandAll: "Expand All", collapseAll: "Collapse All", openFolder: "Open Folder", settings: "Settings",
+    theme: "Color Theme", themeLight: "Light", themeDark: "Dark", transparent: "Transparent background when not hovered" },
+  2052: { search: "搜索 (可使用 * ?)", expandAll: "全部展开", collapseAll: "全部折叠", openFolder: "打开文件夹", settings: "设置",
+    theme: "颜色主题", themeLight: "浅色", themeDark: "深色", transparent: "鼠标未悬停时背景透明" },
+  1028: { search: "搜尋 (可使用 * ?)", expandAll: "全部展開", collapseAll: "全部摺疊", openFolder: "開啟資料夾", settings: "設定",
+    theme: "色彩佈景主題", themeLight: "淺色", themeDark: "深色", transparent: "滑鼠未停留時背景透明" },
+  1029: { search: "Hledat (lze použít * ?)", expandAll: "Rozbalit vše", collapseAll: "Sbalit vše", openFolder: "Otevřít složku", settings: "Nastavení",
+    theme: "Barevný motiv", themeLight: "Světlý", themeDark: "Tmavý", transparent: "Průhledné pozadí bez najetí myší" },
+  1036: { search: "Rechercher (* ? autorisés)", expandAll: "Tout développer", collapseAll: "Tout réduire", openFolder: "Ouvrir le dossier", settings: "Paramètres",
+    theme: "Thème de couleur", themeLight: "Clair", themeDark: "Sombre", transparent: "Arrière-plan transparent hors survol" },
+  1031: { search: "Suchen (* ? möglich)", expandAll: "Alle erweitern", collapseAll: "Alle reduzieren", openFolder: "Ordner öffnen", settings: "Einstellungen",
+    theme: "Farbschema", themeLight: "Hell", themeDark: "Dunkel", transparent: "Transparenter Hintergrund ohne Mauszeiger" },
+  1038: { search: "Keresés (* ? használható)", expandAll: "Összes kibontása", collapseAll: "Összes összecsukása", openFolder: "Mappa megnyitása", settings: "Beállítások",
+    theme: "Színtéma", themeLight: "Világos", themeDark: "Sötét", transparent: "Átlátszó háttér, ha nincs fölötte az egér" },
+  1040: { search: "Cerca (* ? consentiti)", expandAll: "Espandi tutto", collapseAll: "Comprimi tutto", openFolder: "Apri cartella", settings: "Impostazioni",
+    theme: "Tema colori", themeLight: "Chiaro", themeDark: "Scuro", transparent: "Sfondo trasparente senza passaggio del mouse" },
+  1041: { search: "検索 (* ? 使用可)", expandAll: "すべて展開", collapseAll: "すべて折りたたみ", openFolder: "フォルダオープン", settings: "設定",
+    theme: "カラーテーマ", themeLight: "ライト", themeDark: "ダーク", transparent: "非ホバー時に背景を透明にする" },
+  1042: { search: "검색 (* ? 사용 가능)", expandAll: "모두 펼치기", collapseAll: "모두 접기", openFolder: "폴더 열기", settings: "설정",
+    theme: "색 테마", themeLight: "라이트", themeDark: "다크", transparent: "마우스가 없을 때 배경 투명" },
+  1045: { search: "Szukaj (można użyć * ?)", expandAll: "Rozwiń wszystko", collapseAll: "Zwiń wszystko", openFolder: "Otwórz folder", settings: "Ustawienia",
+    theme: "Motyw kolorów", themeLight: "Jasny", themeDark: "Ciemny", transparent: "Przezroczyste tło bez najechania myszą" },
+  1046: { search: "Pesquisar (* ? permitidos)", expandAll: "Expandir tudo", collapseAll: "Recolher tudo", openFolder: "Abrir pasta", settings: "Configurações",
+    theme: "Tema de cores", themeLight: "Claro", themeDark: "Escuro", transparent: "Fundo transparente sem o mouse sobre" },
+  1049: { search: "Поиск (можно * ?)", expandAll: "Развернуть все", collapseAll: "Свернуть все", openFolder: "Открыть папку", settings: "Настройки",
+    theme: "Цветовая тема", themeLight: "Светлая", themeDark: "Тёмная", transparent: "Прозрачный фон без наведения мыши" },
+  1034: { search: "Buscar (se permite * ?)", expandAll: "Expandir todo", collapseAll: "Contraer todo", openFolder: "Abrir carpeta", settings: "Configuración",
+    theme: "Tema de color", themeLight: "Claro", themeDark: "Oscuro", transparent: "Fondo transparente sin el ratón encima" },
+  1055: { search: "Ara (* ? kullanılabilir)", expandAll: "Tümünü genişlet", collapseAll: "Tümünü daralt", openFolder: "Klasörü aç", settings: "Ayarlar",
+    theme: "Renk teması", themeLight: "Açık", themeDark: "Koyu", transparent: "Fare üzerinde değilken saydam arka plan" },
 };
 
 function applyLanguage(lang) {
@@ -354,7 +369,49 @@ function closeSettings() {
 settingsCloseEl.addEventListener("click", closeSettings);
 settingsEl.querySelector(".settings-backdrop").addEventListener("click", closeSettings);
 
+// ---- settings: values ----
+const themeEl = document.getElementById("setting-theme");
+const transparentEl = document.getElementById("setting-transparent");
+let settings = { theme: "light", transparent: true };
+
+function applySettings(s) {
+  settings = {
+    theme: s && s.theme === "dark" ? "dark" : "light",
+    transparent: !(s && s.transparent === false),
+  };
+  const root = document.documentElement;
+  root.dataset.theme = settings.theme;
+  root.classList.toggle("is-transparent", settings.transparent);
+  themeEl.value = settings.theme;
+  transparentEl.checked = settings.transparent;
+}
+
+function saveSettings() {
+  if (!window.adsk) return;
+  adsk.fusionSendData("saveSettings", JSON.stringify(settings));
+}
+
+themeEl.addEventListener("change", () => {
+  applySettings({ ...settings, theme: themeEl.value });
+  saveSettings();
+});
+transparentEl.addEventListener("change", () => {
+  applySettings({ ...settings, transparent: transparentEl.checked });
+  saveSettings();
+});
+
 // ---- events: mouse ----
+// パレット全体のホバー状態（CSS の :hover はウィンドウ外へ出た時の解除が遅れるため JS で管理）
+function setHover(on) {
+  document.documentElement.classList.toggle("is-hover", on);
+  if (!on) hideTooltip();
+}
+document.addEventListener("mouseover", () => setHover(true));
+document.addEventListener("mouseout", (e) => {
+  if (!e.relatedTarget) setHover(false);
+});
+document.documentElement.addEventListener("mouseleave", () => setHover(false));
+
 treeEl.addEventListener("mouseover", (e) => {
   const row = e.target.closest(".tv-row");
   if (row && !row.contains(e.relatedTarget)) {
@@ -511,6 +568,7 @@ treeEl.addEventListener("keydown", (e) => {
 });
 
 // ---- init ----
+applySettings(settings);
 render([{ text: "Loading..." }]);
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -524,6 +582,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let obj = JSON.parse(ret || "null");
         if (!obj) return;
         applyLanguage(obj.lang);
+        applySettings(obj.settings);
         if (!obj.data) return;
         render(obj.data);
       });

@@ -1,3 +1,41 @@
+/* ---- color theme ---- */
+:root {
+  --bg: #ffffff;
+  --fg: #3b3b3b;
+  --btn-fg: #424242;
+  --btn-hover: #e0e0e0;
+  --border: #e0e0e0;
+  --border-strong: #c8c8c8;
+  --input-bg: #ffffff;
+  --focus: #0078d4;
+  --row-hover: #e8e8e8;
+  --row-selected: #e4e6f1;
+  --row-selected-focus: #cce6ff;
+  --chevron: #616161;
+  --popup-bg: #ffffff;
+  --popup-border: #d4d4d4;
+  --tooltip-bg: #ffffe1;
+  --tooltip-border: #999999;
+}
+html[data-theme="dark"] {
+  --bg: #1e1e1e;
+  --fg: #cccccc;
+  --btn-fg: #c5c5c5;
+  --btn-hover: #3c3c3c;
+  --border: #3c3c3c;
+  --border-strong: #555555;
+  --input-bg: #2a2a2a;
+  --focus: #0078d4;
+  --row-hover: #2a2d2e;
+  --row-selected: #37373d;
+  --row-selected-focus: #04395e;
+  --chevron: #c5c5c5;
+  --popup-bg: #252526;
+  --popup-border: #454545;
+  --tooltip-bg: #252526;
+  --tooltip-border: #454545;
+}
+
 html,
 body {
   height: 100%;
@@ -6,10 +44,13 @@ html {
   margin: 0;
   padding: 0;
   font-size: 62.5%;
+  background-color: var(--bg);
   transition: background-color 0.15s;
 }
-html:hover {
-  background-color: #ffffff;
+/* 背景の透明化：ホバーしていない時は透明（is-hover は script.js で付け外し） */
+html.is-transparent:not(.is-hover) {
+  background-color: transparent;
+  transition: none; /* ホバーが外れた時は即座に透明にする */
 }
 body {
   max-width: 800px;
@@ -19,7 +60,7 @@ body {
   font-size: 14px;
   font-size: 1.4em;
   font-family: "Segoe UI", system-ui, sans-serif;
-  color: #3b3b3b;
+  color: var(--fg);
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -41,17 +82,18 @@ body {
   height: 22px;
   margin-right: 4px;
   padding: 0 6px;
-  border: 1px solid #c8c8c8;
+  border: 1px solid var(--border-strong);
   border-radius: 3px;
   box-sizing: border-box;
   font: inherit;
   font-size: 13px;
   color: inherit;
+  background: var(--input-bg);
 }
 .tv-search:focus {
-  outline: 1px solid #0078d4;
+  outline: 1px solid var(--focus);
   outline-offset: -1px;
-  border-color: #0078d4;
+  border-color: var(--focus);
 }
 .tv-btn {
   display: inline-flex;
@@ -63,14 +105,14 @@ body {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #424242;
+  color: var(--btn-fg);
   cursor: pointer;
 }
 .tv-btn:hover {
-  background: #e0e0e0;
+  background: var(--btn-hover);
 }
 .tv-btn:focus-visible {
-  outline: 1px solid #0078d4;
+  outline: 1px solid var(--focus);
 }
 
 /* ---- tree ---- */
@@ -78,7 +120,7 @@ body {
   flex: 1 1 auto;
   overflow: auto;
   min-height: 0;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   font-size: 14px;
   user-select: none;
 }
@@ -104,12 +146,12 @@ body {
   bottom: 0;
   left: calc(var(--depth) * 16px - 4px);
   width: 1px;
-  background: #e0e0e0;
+  background: var(--border);
   pointer-events: none;
   z-index: 1;
 }
 .tv:hover .tv-children::before {
-  background: #c8c8c8;
+  background: var(--border-strong);
 }
 
 .tv-row {
@@ -122,16 +164,16 @@ body {
   cursor: default;
 }
 .tv-row:hover {
-  background: #e8e8e8;
+  background: var(--row-hover);
 }
 .tv-row.is-selected {
-  background: #e4e6f1;
+  background: var(--row-selected);
 }
 .tv:focus-within .tv-row.is-selected {
-  background: #cce6ff;
+  background: var(--row-selected-focus);
 }
 .tv-row:focus {
-  outline: 1px solid #0078d4;
+  outline: 1px solid var(--focus);
   outline-offset: -1px;
 }
 
@@ -152,8 +194,8 @@ body {
   left: 4px;
   width: 5px;
   height: 5px;
-  border-right: 1.5px solid #616161;
-  border-bottom: 1.5px solid #616161;
+  border-right: 1.5px solid var(--chevron);
+  border-bottom: 1.5px solid var(--chevron);
   transform: rotate(-45deg);
   transition: transform 0.15s ease-out;
 }
@@ -184,8 +226,8 @@ body {
   z-index: 1000;
   min-width: 140px;
   padding: 4px 0;
-  background: #ffffff;
-  border: 1px solid #d4d4d4;
+  background: var(--popup-bg);
+  border: 1px solid var(--popup-border);
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
   font-size: 13px;
@@ -197,7 +239,7 @@ body {
   white-space: nowrap;
 }
 .ctx-item:hover {
-  background: #e8e8e8;
+  background: var(--row-hover);
 }
 
 /* ---- tooltip ---- */
@@ -207,8 +249,8 @@ body {
   pointer-events: none;
   max-width: 280px;
   padding: 4px 8px;
-  background: #ffffe1;
-  border: 1px solid #999999;
+  background: var(--tooltip-bg);
+  border: 1px solid var(--tooltip-border);
   box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.2);
   font-size: 12px;
   line-height: 1.4;
@@ -239,7 +281,7 @@ body {
   max-height: 80%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--popup-bg);
   border-radius: 0 0 6px 6px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
   transform: translateY(-100%);
@@ -256,7 +298,7 @@ body {
   display: flex;
   align-items: center;
   padding: 8px 10px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border);
 }
 .settings-title {
   flex: 1 1 auto;
@@ -272,20 +314,55 @@ body {
   border: none;
   border-radius: 4px;
   background: transparent;
-  color: #424242;
+  color: var(--btn-fg);
   cursor: pointer;
 }
 .settings-close:hover {
-  background: #e0e0e0;
+  background: var(--btn-hover);
 }
 .settings-close:focus-visible {
-  outline: 1px solid #0078d4;
+  outline: 1px solid var(--focus);
 }
 .settings-body {
   flex: 1 1 auto;
   min-height: 60px;
   overflow: auto;
   padding: 10px;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+}
+.settings-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.settings-select {
+  flex: none;
+  height: 22px;
+  padding: 0 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  background: var(--input-bg);
+}
+.settings-select:focus,
+.settings-check:focus-visible {
+  outline: 1px solid var(--focus);
+  outline-offset: -1px;
+}
+.settings-check {
+  flex: none;
+  margin: 0;
+}
+/* フォームコントロールのみダーク表示（ルートに付けると透明背景が塗られるため） */
+html[data-theme="dark"] .settings-select,
+html[data-theme="dark"] .settings-check {
+  color-scheme: dark;
 }
 
 .ctx-menu[hidden],
