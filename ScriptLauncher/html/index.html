@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light" class="is-transparent">
+<html lang="en" data-theme="light" data-font="pixelmplus12" class="is-transparent">
   <head>
     <meta charset="UTF-8" />
     <title>Script Launcher</title>
@@ -56,6 +56,13 @@
           <div class="settings-row">
             <label for="setting-transparent" class="settings-label" data-i18n="transparent">Transparent background when not hovered</label>
             <input type="checkbox" id="setting-transparent" class="settings-check" />
+          </div>
+          <div class="settings-row">
+            <label for="setting-font" class="settings-label" data-i18n="font">Font</label>
+            <select id="setting-font" class="settings-select">
+              <option value="pixelmplus12" data-i18n="fontRetro">8-bit Retro</option>
+              <option value="segoeui" data-i18n="fontStandard">Standard</option>
+            </select>
           </div>
         </div>
       </div>

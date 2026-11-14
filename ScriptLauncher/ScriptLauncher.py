@@ -83,6 +83,7 @@ _SETTINGS_PATH = os.path.join(os.path.dirname(__file__), "setting.json")
 _DEFAULT_SETTINGS = {
     "theme": "light",       # "light" / "dark"
     "transparent": True,    # 非ホバー時に背景を透明にする
+    "font": "pixelmplus12", # "pixelmplus12" / "segoeui"
 }
 
 
@@ -95,6 +96,8 @@ def normalize_settings(data) -> dict:
         settings["theme"] = data["theme"]
     if isinstance(data.get("transparent"), bool):
         settings["transparent"] = data["transparent"]
+    if data.get("font") in ("pixelmplus12", "segoeui"):
+        settings["font"] = data["font"]
     return settings
 
 
