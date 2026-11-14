@@ -21,7 +21,7 @@
 		"1034":	"Complemento que permite ejecutar scripts fácilmente desde un menú en forma de árbol.",
 		"1055":	"Komut dosyalarını ağaç yapısındaki bir menüden kolayca çalıştırmanızı sağlayan eklenti."
 	},
-	"version":	"0.1.5",
+	"version":	"0.1.6",
 	"runOnStartup":	true,
 	"supportedOS":	"windows|mac",
 	"iconFilename":	"AddInIcon.svg",

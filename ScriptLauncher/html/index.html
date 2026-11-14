@@ -2,6 +2,8 @@
 <html lang="en" data-theme="light" data-font="pixelmplus12" class="is-transparent">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; font-src 'self'" />
     <title>Script Launcher</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
@@ -54,15 +56,15 @@
             </select>
           </div>
           <div class="settings-row">
-            <label for="setting-transparent" class="settings-label" data-i18n="transparent">Transparent background when not hovered</label>
-            <input type="checkbox" id="setting-transparent" class="settings-check" />
-          </div>
-          <div class="settings-row">
             <label for="setting-font" class="settings-label" data-i18n="font">Font</label>
             <select id="setting-font" class="settings-select">
               <option value="pixelmplus12" data-i18n="fontRetro">8-bit Retro</option>
               <option value="segoeui" data-i18n="fontStandard">Standard</option>
             </select>
+          </div>
+          <div class="settings-row">
+            <label for="setting-transparent" class="settings-label" data-i18n="transparent">Transparent background when not hovered</label>
+            <input type="checkbox" id="setting-transparent" class="settings-check" />
           </div>
         </div>
       </div>

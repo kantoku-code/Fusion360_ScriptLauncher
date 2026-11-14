@@ -45,6 +45,10 @@ ICON_MAP = {
     core.ProgrammingLanguages.CPPProgramminglanguage: "resources/cpp.png",
 }
 
+# manifest の iconFilename として許可する拡張子とサイズ上限
+ICON_EXTENSIONS = (".png", ".svg", ".jpg", ".jpeg", ".gif", ".ico")
+ICON_MAX_BYTES = 1024 * 1024
+
 
 @dataclass
 class ScriptContainer:
@@ -77,8 +81,17 @@ class ScriptContainer:
             if not iconName:
                 return None
 
-            iconPath = folder / iconName
+            # スクリプトフォルダ外のファイルは読まない（パストラバーサル対策）
+            iconPath = (folder / iconName).resolve()
+            try:
+                iconPath.relative_to(folder.resolve())
+            except ValueError:
+                return None
             if not iconPath.is_file():
+                return None
+            if iconPath.suffix.lower() not in ICON_EXTENSIONS:
+                return None
+            if iconPath.stat().st_size > ICON_MAX_BYTES:
                 return None
 
             if iconPath.suffix.lower() == ".svg":
@@ -87,7 +100,7 @@ class ScriptContainer:
                 mime = mimetypes.guess_type(str(iconPath))[0] or "image/png"
             data = base64.b64encode(iconPath.read_bytes()).decode("ascii")
             return f"data:{mime};base64,{data}"
-        except:
+        except Exception:
             return None
 
     def toJson(self) -> dict:

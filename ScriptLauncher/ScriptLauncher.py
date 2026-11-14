@@ -88,6 +88,7 @@ _DEFAULT_SETTINGS = {
     "height": _paletteInfo["height"],   # パレットの高さ
 }
 _MIN_PALETTE_SIZE = 100
+_MAX_PALETTE_SIZE = 4000
 
 
 def normalize_settings(data) -> dict:
@@ -104,7 +105,7 @@ def normalize_settings(data) -> dict:
     for key in ("width", "height"):
         value = data.get(key)
         if isinstance(value, int) and not isinstance(value, bool) \
-                and value >= _MIN_PALETTE_SIZE:
+                and _MIN_PALETTE_SIZE <= value <= _MAX_PALETTE_SIZE:
             settings[key] = value
     return settings
 
@@ -177,8 +178,10 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                 if not self.scriptsMgr:
                     return
                 data = json.loads(htmlArgs.data)
+                if not isinstance(data, dict):
+                    return
                 idStr = str(data.get("id", ""))
-                if not idStr.isdigit():
+                if not idStr.isdecimal():
                     return
                 script: core.Script = self.scriptsMgr.get_item_by_id(int(idStr))
                 if script:
@@ -188,8 +191,10 @@ class MyHTMLEventHandler(core.HTMLEventHandler):
                 if not self.scriptsMgr:
                     return
                 data = json.loads(htmlArgs.data)
+                if not isinstance(data, dict):
+                    return
                 idStr = str(data.get("id", ""))
-                if not idStr.isdigit():
+                if not idStr.isdecimal():
                     return
                 script: core.Script = self.scriptsMgr.get_item_by_id(int(idStr))
                 if not script:
