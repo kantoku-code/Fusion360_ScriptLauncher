@@ -1,5 +1,8 @@
 # Change of Fusion360 ScriptLauncher
 
+## 0.1.5
++ パレットのサイズ（幅・高さ）を setting.json に保存し、次回表示時に復元するように変更（フローティング時のみ保存）
+
 ## 0.1.4
 + ドット絵フォント PixelMplus12（M+ FONT LICENSE）を同梱し、パレットの既定フォントに変更
 + 設定パネルにフォントの切り替え（ファミコン風／標準）を追加し、setting.json に保存するように変更

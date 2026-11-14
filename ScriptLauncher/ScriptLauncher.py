@@ -84,7 +84,10 @@ _DEFAULT_SETTINGS = {
     "theme": "light",       # "light" / "dark"
     "transparent": True,    # 非ホバー時に背景を透明にする
     "font": "pixelmplus12", # "pixelmplus12" / "segoeui"
+    "width": _paletteInfo["width"],     # パレットの幅
+    "height": _paletteInfo["height"],   # パレットの高さ
 }
+_MIN_PALETTE_SIZE = 100
 
 
 def normalize_settings(data) -> dict:
@@ -98,6 +101,11 @@ def normalize_settings(data) -> dict:
         settings["transparent"] = data["transparent"]
     if data.get("font") in ("pixelmplus12", "segoeui"):
         settings["font"] = data["font"]
+    for key in ("width", "height"):
+        value = data.get(key)
+        if isinstance(value, int) and not isinstance(value, bool) \
+                and value >= _MIN_PALETTE_SIZE:
+            settings[key] = value
     return settings
 
 
@@ -111,9 +119,25 @@ def load_settings() -> dict:
 
 
 def save_settings(data) -> None:
-    """設定を検証して setting.json に保存する。"""
+    """既存の設定に data をマージし、検証して setting.json に保存する。"""
+    settings = load_settings()
+    if isinstance(data, dict):
+        settings.update(data)
     with open(_SETTINGS_PATH, "w", encoding="utf-8") as f:
-        json.dump(normalize_settings(data), f, indent=2)
+        json.dump(normalize_settings(settings), f, indent=2)
+
+
+def save_palette_size(palette) -> None:
+    """フローティング中のパレットのサイズを setting.json に保存する。"""
+    try:
+        if not (palette and palette.isValid):
+            return
+        if palette.dockingState != core.PaletteDockingStates.PaletteDockStateFloating:
+            return
+        save_settings({"width": palette.width, "height": palette.height})
+    except Exception:
+        core.Application.get().log(
+            "Failed to save palette size:\n{}".format(traceback.format_exc()))
 
 
 class MyHTMLEventHandler(core.HTMLEventHandler):
@@ -195,6 +219,7 @@ def initPallet(keepIfVisible=False):
     if palette and palette.isValid:
         palette.deleteMe()
 
+    settings = load_settings()
     palette = _ui.palettes.addTransparent(
         _paletteInfo["id"],
         _paletteInfo["name"],
@@ -203,8 +228,8 @@ def initPallet(keepIfVisible=False):
         _paletteInfo["showCloseButton"],
         _paletteInfo["isResizable"],
         _paletteInfo["isOpaque"],
-        _paletteInfo["width"],
-        _paletteInfo["height"],
+        settings["width"],
+        settings["height"],
     )
 
     if _palette_geometry:
@@ -263,6 +288,7 @@ class MyCloseEventHandler(core.UserInterfaceGeneralEventHandler):
             if _is_stopping:
                 return
             _palette_visible = False
+            save_palette_size(_ui.palettes.itemById(_paletteInfo["id"]))
         except Exception:
             _ui.messageBox("Failed:\n{}".format(traceback.format_exc()))
 
@@ -470,6 +496,8 @@ def stop(context):
         global _paletteInfo
         palette = _ui.palettes.itemById(_paletteInfo["id"])
         if palette:
+            if palette.isVisible:
+                save_palette_size(palette)
             palette.deleteMe()
 
         global _cmdInfo
