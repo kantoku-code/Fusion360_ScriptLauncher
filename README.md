@@ -1,5 +1,5 @@
 # ***Autodesk Fusion ScriptLauncher***
-This is an add-in for the Autodesk software Fusion360.
+This is an add-in for Autodesk Fusion.
 
 A tree-like menu to simplify the sequential execution of scripts.
 
@@ -57,7 +57,7 @@ To uninstall, delete the copied "ScriptLauncher" folder.
   - Otherwise, Python scripts and C++ scripts are shown with their own icons.
   - The palette text switches to match Fusion's display language.
   - Hovering the mouse cursor over a script shows its description as a tooltip.
-  - The ☆ mark is added to the sample scripts bundled with Fusion360 (those in the same folder as "SpurGear").
+  - The ☆ mark is added to the sample scripts bundled with Autodesk Fusion (those in the same folder as "SpurGear").
 
 - **Not shown**
   - Add-ins
@@ -120,7 +120,7 @@ The following environment is confirmed.
 
 # *** 以下は日本語です。***
 
-このアドインは、Fusion360用アドインです。
+このアドインは、Autodesk Fusion用アドインです。
 
 スクリプトの連続実行を簡素化する為のツリー状のメニューです。
 
@@ -177,7 +177,7 @@ The following environment is confirmed.
   - 指定が無い場合、Python スクリプトと C++ スクリプトは、それぞれ専用のアイコンで表示されます。
   - パレットの文言は、Fusion の表示言語に合わせて切り替わります。
   - スクリプトにマウスカーソルを合わせると、スクリプトの説明（description）がツールチップで表示されます。
-  - ☆印は、Fusion360 に標準で入っているサンプルスクリプト（"SpurGear" と同じフォルダにあるもの）に付きます。
+  - ☆印は、Autodesk Fusion に標準で入っているサンプルスクリプト（"SpurGear" と同じフォルダにあるもの）に付きます。
 
 - **表示されないもの**
   - アドイン
